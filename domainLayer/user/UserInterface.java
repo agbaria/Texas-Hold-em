@@ -9,7 +9,11 @@ public interface UserInterface {
 
 	public void GameUpdated();
 
-
+    public void editPassword(String newPassword);
+	
+	public void editName(String newName);
+	
+	public void editEmail(String newEmail);
 
 	public boolean takeAction();
 
