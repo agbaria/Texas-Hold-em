@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import com.sun.istack.internal.logging.Logger;
 
 import Game.Game;
+import Game.GameInterface;
 import Game.Player;
 import Game.Enum.GameType;
 import System.GameCenter;
@@ -23,7 +24,7 @@ public class User implements UserInterface {
 	private int league;
 	Logger my_log;
 
-	public User(String ID, String password, String name, String email, int totalCash, int score,int league){
+	public User(String ID, String password, String name, String email, int totalCash, int score, int league){
 		this.ID = ID;
 		this.password=password;
 		this.name = name;
@@ -32,99 +33,7 @@ public class User implements UserInterface {
 		this.score = score;
 		status = UserStatus.DISCONNECTED;
 		my_log = Logger.getLogger(User.class);
-		this.setLeague(league);
-	}
-	
-	public String getName(){
-		return name;
-	}
-	  
-
-	public int geTotalCash(){
-		return totalCash;
-	}
-
-	public String toString()
-	{
-		return "ID: "+ID+"\n"+"name: "+name+"\n";
-	}
-	
-	public String getID()
-	{
-		return this.ID;
-	}
-	
-	public String getEmail()
-	{
-		return this.email;
-	}
-	
-	public String getPassword()
-	{
-		return this.password;
-	}
-	
-	public UserStatus getStatus()
-	{
-		return this.status;
-	}
-	  
-	public void GameUpdated(){
-		 
-	}
-	
-	public boolean takeAction(){
-		 
-		 
-		 return false;
-	}
-	
-	
-	public boolean fold(){
-		 
-		 return false;
-	}
-	
-	
-	public boolean check(){
-		 
-		 return false;
-	}
-	
-	public boolean bet(int money){
-		 
-		 return false;
-	}
-	
-	public boolean leaveGame(Player player){
-		 
-		 return false;
-	}
-	
-	
-	public boolean giveMoney(int money){
-		 
-		 return false;
-	}
-	
-	
-	
-
-	
-	
-	public LinkedList<Game> Search(String playerName,int potSize){
-		   
-		   
-		   return null;
-	}
-	
-	public boolean joinGame(Player player){
-		   
-		   return false;
-	}
-	
-	public void editPassword(String newPassword) {
-		this.password = newPassword;
+		this.league = league;
 	}
 	
 	public void getLog(LinkedList<String> i_game_logs){
@@ -143,21 +52,70 @@ public class User implements UserInterface {
 	
 	public void editName(String newName) {
 		this.name = newName;
-		
 	}
 	
 	public void editEmail(String newEmail) {
 		this.email = newEmail;
-		
+	}
+	
+	public void editPassword(String newPassword) {
+		this.password = newPassword;
+	}
+	
+	public String getID() {
+		return ID;
 	}
 
-	public void login() {
-		this.status = UserStatus.CONNECTED;
+	public void setID(String iD) {
+		ID = iD;
 	}
-	
-	
-	public void logout() {
-		this.status = UserStatus.DISCONNECTED;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public int getTotalCash() {
+		return totalCash;
+	}
+
+	public void setTotalCash(int totalCash) {
+		this.totalCash = totalCash;
+	}
+
+	public int getScore() {
+		return score;
+	}
+
+	public void setScore(int score) {
+		this.score = score;
+	}
+
+	public UserStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(UserStatus status) {
+		this.status = status;
 	}
 
 	public int getLeague() {
@@ -166,6 +124,38 @@ public class User implements UserInterface {
 
 	public void setLeague(int league) {
 		this.league = league;
+	}
+
+
+	public void GameUpdated(GameInterface game) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public boolean takeAction() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean giveMoney(int money) {
+		if(totalCash  + money >0){
+		totalCash+=money;
+		return true;}
+		return false;
+	}
+
+	@Override
+	public boolean addPlayer(Player player) {
+		inGamePlayers.add(player);
+		return true;
+	}
+
+	@Override
+	public boolean removePlayer(Player player) {
+		inGamePlayers.remove(player);
+		return true;
 	}
 
 }

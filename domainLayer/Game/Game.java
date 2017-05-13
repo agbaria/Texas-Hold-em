@@ -13,44 +13,41 @@ import System.GameLogs;
  * @author ahmad
  *
  */
-public class Game implements GameInterface,Runnable{
+public class Game implements GameInterface, Runnable{
 
+	private LinkedList<Player> activePlayers;
 	private LinkedList<Player> players;
-	private Queue<Player> WantToJoinPlayers;
 	private Player CurrentPlayer;
 	private Deck deck;	
-	private int num_of_want_to_join;
 	private GamePreferences preferences;
-	private int playersNumber;
+	private int activePlayersNumber;
 	private int cashOnTheTable = 0;
-	private int GameID;
+	private String GameID;
 	private int CurrentBet;
-	private LinkedList<UserInterface> user_waches;
+	private LinkedList<Spectator> user_watches;
 	GameLogs log_game;
 	private Card[] table;
 	private int cardsOnTable;
 	private int blindBit;
-	private LinkedList<Player> folded = new LinkedList<Player>();
+    private boolean isCalled;
 	
-	public Game(Player Creator, GamePreferences preferences, int GameID){
-		players = new LinkedList<Player>();
-		WantToJoinPlayers = new LinkedList<Player>();
+	public Game(GamePreferences preferences, String GameID){
+		isCalled = false;
+		activePlayers = new LinkedList<Player>();
 		this.GameID = GameID;
 		deck = new Deck();
 		deck.shuffle();
-		num_of_want_to_join = 0;
 		this.preferences = preferences;
-		players.add(Creator);
-		playersNumber = 1;
+		activePlayersNumber = 0;
 		log_game = new  GameLogs(GameID);
-		user_waches = new LinkedList<UserInterface>();
+		user_watches = new LinkedList<Spectator>();
 		table = new Card[5];
 		cardsOnTable = 0;
 		blindBit = 0;
 	}
 	
 	public int getPlayerNumber(){
-		return players.size();
+		return activePlayers.size();
 	}
 	
 	public int getMinBid(){
@@ -60,7 +57,7 @@ public class Game implements GameInterface,Runnable{
 	public GamePreferences getpreferences(){
 		return preferences;
 	}
-	public int getGameID(){
+	public String getGameID(){
 		return GameID;
 	}
 	
@@ -69,110 +66,194 @@ public class Game implements GameInterface,Runnable{
 	}
 	
 	public Player[] getPlayers(){
-		return players.toArray(new Player[0]);
+		return activePlayers.toArray(new Player[0]);
 	}
 	
-	public Player[] getWantToJoinPlayers(){
-		return WantToJoinPlayers.toArray(new Player[0]);
-	}
+
 	
-	public void AddUserToWatch(UserInterface p){
+	public boolean AddUserToWatch(UserInterface p){
+		if(preferences.isSpectatable()){
 		log_game.addLog(p.getName() + " Watching the Game");
-		user_waches.add(p);
+		
+		user_watches.add(new Spectator(p));
+		return true;}
+		log_game.addLog(p.getName() + " Failed to Spectate the Game");
+		
+		return false;
 	}
 	
 	/**
 	 * This method Used by GameCenter to add new player to the game
 	 * @param player this player will be holded by the relevant user 
-	 * @return true if this player can join the Game, else (there's more than MaxPlayers players, or his cash not enough) return false
+	 * @return true if this player can join the Game, else (there's more than MaxPlayers activePlayers, or his cash not enough) return false
 	 */
-	public boolean joinGame(Player player){
-		if(player.getUser().geTotalCash() < preferences.getMinBet()){
+	public boolean joinGame(UserInterface p){
+		
+		for(Player ppp: players)
+		{
+			if(ppp.getUser().getID().equals(p.getID())){
+				log_game.addLog(p.getName() + "failed to joing this Game because he is there");
+				return false;}
+			
+			
+		}
+
+		Player player;
+		if(preferences.getChipPolicy() == 0){
+			player = new Player(p.getTotalCash(), p);
+			
+			
+		}
+		else{
+			if(preferences.getChipPolicy() > p.getTotalCash())
+				return false;
+			else 
+				player= new Player (preferences.getChipPolicy(),p);
+			
+		}
+		
+		if(!preferences.checkPlayer(player)){
 			log_game.addLog(player.getUser().getName() + "failed to joing this Game because of his total cash");
 			return false;
 		}
-		if(players.size()+WantToJoinPlayers.size() < preferences.getMaxPlayersNum()) {
+		else
+		if(players.size() < preferences.getMaxPlayersNum()) {
 			synchronized (this) {
-				if(players.size() +WantToJoinPlayers.size() < preferences.getMaxPlayersNum()) {
-					WantToJoinPlayers.add(player);
-					num_of_want_to_join++;
+				if(players.size() < preferences.getMaxPlayersNum()) {
+
+					players.add(player);
+					player.takeMoney(preferences.getBuyInPolicy());
 					log_game.addLog(player.getUser().getName() + "Joined The Game");
+					return true;
 				}
 				else return false;
 			}
 		}
-		else //The game is full and there are enough players waiting to join.
+		else //The game is full and there are enough activePlayers waiting to join.
 			return false;
-		return true;
+		
 	}
 	
-	public boolean fold(Player player) {
+	
+	
+public boolean isJoinAbleGame(UserInterface p){
+		
+		for(Player ppp: players)
+		{
+			if(ppp.getUser().getID().equals(p.getID())){
+				return false;}
+			
+			
+		}
+
+		Player player;
+		if(preferences.getChipPolicy() == 0){
+			player = new Player(p.getTotalCash(), p);
+			
+			
+		}
+		else{
+			if(preferences.getChipPolicy() > p.getTotalCash())
+				return false;
+			else 
+				player= new Player (preferences.getChipPolicy(),p);
+			
+		}
+		
+		if(!preferences.checkPlayer(player)){
+			return false;
+		}
+		else
+		if(players.size() < preferences.getMaxPlayersNum()) {
+			synchronized (this) {
+				if(players.size() < preferences.getMaxPlayersNum()) {
+
+					return true;
+				}
+				else return false;
+			}
+		}
+		else //The game is full and there are enough activePlayers waiting to join.
+			return false;
+		
+	}
+	private Player getPlayerByUser(UserInterface user){
+		for(Player ppp: players)
+		{
+			if(ppp.getUser().getID().equals(user.getID())){
+	
+				return ppp;}
+			
+			
+		}
+
+		return null;
+		
+	}
+	
+	public boolean fold(UserInterface user) {
+		Player player =getPlayerByUser(user);
+		
 		if(player == CurrentPlayer){
-		WantToJoinPlayers.add(player);
-		num_of_want_to_join++;
-		players.remove(player);
-		playersNumber--;
-		log_game.addLog(player.getUser().getName() + "Fold for This round");
+		activePlayers.remove(player);
+		activePlayersNumber--;
+		log_game.addLog(user.getName() + "Fold for This round");
 		
 		return true;}
-		log_game.addLog(player.getUser().getName() + "Failed to fold");
+		log_game.addLog(user.getName() + "Failed to fold");
 		return false;
 	}
 	
-	public boolean check(Player player) {
-		if(player == CurrentPlayer){
-		log_game.addLog(player.getUser().getName() + "Checked for This Round");
+	public boolean check(UserInterface user) {
+		Player player =getPlayerByUser(user);
+		if(player == CurrentPlayer && !isCalled){
+		log_game.addLog(user.getName() + "Checked for This Round");
 		
 		return true;}
 		else {
-			log_game.addLog(player.getUser().getName() + "Failed To Check");
+			
+			log_game.addLog(user.getName() + "Failed To Check");
 			return false;
 		}
 	}
 	
-	public boolean bet(Player player, int money) {
-		if(player.getCash() >= money && money>=CurrentBet && player == CurrentPlayer)
+	public boolean bet(UserInterface user, int money) {
+		Player player =getPlayerByUser(user);
+		if(player !=null &&player.getCash() >= money && money>=CurrentBet && player == CurrentPlayer)
 		 {cashOnTheTable += money;
-		 log_game.addLog(player.getUser().getName() + "Betted for This Round: "+ money);
+		 log_game.addLog(user.getName() + "Betted for This Round: "+ money);
 		return true;}
-		log_game.addLog(player.getUser().getName() + "Failed To Bet");
+		log_game.addLog(user.getName() + "Failed To Bet");
 		return false;
 	}
 	
-	public boolean leaveGame(Player player) {
-
+	public boolean leaveGame(UserInterface user) {
+		Player player =getPlayerByUser(user);
 		synchronized (this) {
-			 
-			boolean found = players.contains(player);
-			if(found) {
-				if(players.indexOf(player) <= blindBit) 
-					if(blindBit == 0) blindBit = players.size() -1;
+			boolean found =  players.remove(player);
+			
+			if(activePlayers.contains(player)) {
+				if(activePlayers.indexOf(player) <= blindBit) 
+					if(blindBit == 0) blindBit = activePlayers.size() -1;
 					else blindBit --;
 				log_game.addLog(player.getUser().getName() + "Left The Game");
-				playersNumber--;
-				players.removeFirstOccurrence(player);
-			}
-			else if (WantToJoinPlayers.remove(player)) 
-			{num_of_want_to_join--;
-			log_game.addLog(player.getUser().getName() + "Left The Game");
-			return true;
-				
-				
+				activePlayersNumber--;
+				activePlayers.removeFirstOccurrence(player);
 			}
 			return found;
 		}
 	}
 
 	private boolean dealCardsForPlayers() {
-		for(int i=0;i < players.size(); i++ ){
+		for(int i=0;i < activePlayers.size(); i++ ){
 			Card card1 = deck.getCard();
 			Card card2 = deck.getCard();
 			if(card1 == null || card2 == null) return false;
-			players.get(i).giveCards(card1, card2);
-			log_game.addLog(players.get(i).getUser().getName() + " got this cards: "+ card1.getNumber() + "of Kind: " + card1.getType()+" And "+ card2.getNumber() + " of Kind: " + card2.getType());
+			activePlayers.get(i).giveCards(card1, card2);
+			log_game.addLog(activePlayers.get(i).getUser().getName() + " got this cards: "+ card1.getNumber() + "of Kind: " + card1.getType()+" And "+ card2.getNumber() + " of Kind: " + card2.getType());
 			
 		}
-		if (players.size() <2) return false; 
+		if (activePlayers.size() <2) return false; 
 		return true;
 	}
 	
@@ -197,10 +278,10 @@ public class Game implements GameInterface,Runnable{
 	private Player[] checkWinner(){
 		Player [] result = null;
 		 
-		if(players.size() == 1) {
+		if(activePlayers.size() == 1) {
 			 result = new Player[1];
-		     result[0] = players.element();}
-		else if(players.size()!=0){
+		     result[0] = activePlayers.element();}
+		else if(activePlayers.size()!=0){
 			
 			result = RoyalFlush();
 			if(result!= null && result.length !=0)
@@ -244,14 +325,14 @@ public class Game implements GameInterface,Runnable{
 	private Player[] FourOfAKind(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
-			if(players.get(i).getCards()[0].getNumber() == players.get(i).getCards()[1].getNumber()){
+		for(int i=0;i<activePlayers.size();i++){
+			if(activePlayers.get(i).getCards()[0].getNumber() == activePlayers.get(i).getCards()[1].getNumber()){
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					      counterTable++;
 					if(counterTable == 2) {
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
 				
@@ -261,19 +342,19 @@ public class Game implements GameInterface,Runnable{
 			else{
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					      counterTable++;
 					if(counterTable == 3) {
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
 				if(counterTable!=3){
 					counterTable = 0;
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[1].getNumber())
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
 						      counterTable++;
 						if(counterTable == 3) {
-							result.add(players.get(i));
+							result.add(activePlayers.get(i));
 							break;}
 					}
 				}
@@ -292,14 +373,14 @@ public class Game implements GameInterface,Runnable{
 	private Player[] ThreeOFKind(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
-			if(players.get(i).getCards()[0].getNumber() == players.get(i).getCards()[1].getNumber()){
+		for(int i=0;i<activePlayers.size();i++){
+			if(activePlayers.get(i).getCards()[0].getNumber() == activePlayers.get(i).getCards()[1].getNumber()){
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					      counterTable++;
 					if(counterTable == 1) {
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
 				
@@ -309,19 +390,19 @@ public class Game implements GameInterface,Runnable{
 			else{
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					      counterTable++;
 					if(counterTable == 2) {
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
 				if(counterTable!=2){
 					counterTable = 0;
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[1].getNumber())
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
 						      counterTable++;
 						if(counterTable == 2) {
-							result.add(players.get(i));
+							result.add(activePlayers.get(i));
 							break;}
 					}
 				}
@@ -339,14 +420,14 @@ public class Game implements GameInterface,Runnable{
 	private Player[] Flush(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
-			if(players.get(i).getCards()[0].getType() == players.get(i).getCards()[1].getType()){
+		for(int i=0;i<activePlayers.size();i++){
+			if(activePlayers.get(i).getCards()[0].getType() == activePlayers.get(i).getCards()[1].getType()){
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getType()==players.get(i).getCards()[0].getType())
+					if(table[j].getType()==activePlayers.get(i).getCards()[0].getType())
 					      counterTable++;
 					if(counterTable == 3) {
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
 				
@@ -356,19 +437,19 @@ public class Game implements GameInterface,Runnable{
 			else{
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getType()==players.get(i).getCards()[0].getType())
+					if(table[j].getType()==activePlayers.get(i).getCards()[0].getType())
 					      counterTable++;
 					if(counterTable == 4) {
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
 				if(counterTable!=4){
 					counterTable = 0;
 					for(int j=0;j<table.length;j++){
-						if(table[j].getType()==players.get(i).getCards()[1].getType())
+						if(table[j].getType()==activePlayers.get(i).getCards()[1].getType())
 						      counterTable++;
 						if(counterTable == 4) {
-							result.add(players.get(i));
+							result.add(activePlayers.get(i));
 							break;}
 					}
 				}
@@ -385,11 +466,11 @@ public class Game implements GameInterface,Runnable{
 	private Player[] TwoPair(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
-			if(players.get(i).getCards()[0].getNumber() != players.get(i).getCards()[1].getNumber()){
+		for(int i=0;i<activePlayers.size();i++){
+			if(activePlayers.get(i).getCards()[0].getNumber() != activePlayers.get(i).getCards()[1].getNumber()){
 				boolean isOnePair = false;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					{
 						isOnePair = true;
 						break;}
@@ -397,8 +478,8 @@ public class Game implements GameInterface,Runnable{
 				if(isOnePair){
 	
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[1].getNumber())
-							{result.add(players.get(i));
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
+							{result.add(activePlayers.get(i));
 						break;}
 						
 					}
@@ -416,13 +497,13 @@ public class Game implements GameInterface,Runnable{
 	private Player[] FullHouse(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
-			if(players.get(i).getCards()[0].getNumber() != players.get(i).getCards()[1].getNumber()){
+		for(int i=0;i<activePlayers.size();i++){
+			if(activePlayers.get(i).getCards()[0].getNumber() != activePlayers.get(i).getCards()[1].getNumber()){
 				boolean ThreeOfKind = false;
 				boolean isFirstCard = false;
 				int counterTable =0;
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					      counterTable++;
 					if(counterTable == 2) {
 						ThreeOfKind = true;
@@ -432,7 +513,7 @@ public class Game implements GameInterface,Runnable{
 				if(counterTable!=2){
 					counterTable = 0;
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[1].getNumber())
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
 						      counterTable++;
 						if(counterTable == 2) {
 							ThreeOfKind = true;
@@ -442,15 +523,15 @@ public class Game implements GameInterface,Runnable{
 				if(ThreeOfKind){
 	              if(isFirstCard){
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[1].getNumber())
-							{result.add(players.get(i));
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
+							{result.add(activePlayers.get(i));
 						break;}
 						
 					}}
 				else{
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
-							{result.add(players.get(i));
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
+							{result.add(activePlayers.get(i));
 						break;}
 						
 					}
@@ -470,22 +551,22 @@ public class Game implements GameInterface,Runnable{
 	private Player[] OnePair(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
-			if(players.get(i).getCards()[0].getNumber() == players.get(i).getCards()[1].getNumber()){
-				result.add(players.get(i));
+		for(int i=0;i<activePlayers.size();i++){
+			if(activePlayers.get(i).getCards()[0].getNumber() == activePlayers.get(i).getCards()[1].getNumber()){
+				result.add(activePlayers.get(i));
 			}
 			else{
 				for(int j=0;j<table.length;j++){
-					if(table[j].getNumber()==players.get(i).getCards()[0].getNumber())
+					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					{
-						result.add(players.get(i));
+						result.add(activePlayers.get(i));
 						break;}
 				}
-				if(!result.contains(players.get(i))){
+				if(!result.contains(activePlayers.get(i))){
 	
 					for(int j=0;j<table.length;j++){
-						if(table[j].getNumber()==players.get(i).getCards()[1].getNumber())
-							{result.add(players.get(i));
+						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
+							{result.add(activePlayers.get(i));
 						break;}
 						
 					}
@@ -504,18 +585,18 @@ public class Game implements GameInterface,Runnable{
 
 		int maxCard = 0;
 		LinkedList<Player> result = new LinkedList<Player>();
-		for(int i=0;i<players.size();i++){
+		for(int i=0;i<activePlayers.size();i++){
                   
-			if((maxCard<players.get(i).getCards()[0].getNumber() && players.get(i).getCards()[0].getNumber() != 1)|| players.get(i).getCards()[0].getNumber() == 1) maxCard = players.get(i).getCards()[0].getNumber();
-			if ((maxCard<players.get(i).getCards()[1].getNumber() && players.get(i).getCards()[1].getNumber() != 1)|| players.get(i).getCards()[1].getNumber() == 1) maxCard = players.get(i).getCards()[1].getNumber();
+			if((maxCard<activePlayers.get(i).getCards()[0].getNumber() && activePlayers.get(i).getCards()[0].getNumber() != 1)|| activePlayers.get(i).getCards()[0].getNumber() == 1) maxCard = activePlayers.get(i).getCards()[0].getNumber();
+			if ((maxCard<activePlayers.get(i).getCards()[1].getNumber() && activePlayers.get(i).getCards()[1].getNumber() != 1)|| activePlayers.get(i).getCards()[1].getNumber() == 1) maxCard = activePlayers.get(i).getCards()[1].getNumber();
 			
 			
 			
 		}
 		
-		for(int i=0;i<players.size();i++){
+		for(int i=0;i<activePlayers.size();i++){
             
-			if(maxCard==players.get(i).getCards()[0].getNumber() || maxCard==players.get(i).getCards()[1].getNumber()) result.add(players.get(i));
+			if(maxCard==activePlayers.get(i).getCards()[0].getNumber() || maxCard==activePlayers.get(i).getCards()[1].getNumber()) result.add(activePlayers.get(i));
 			
 			
 			
@@ -558,19 +639,18 @@ public class Game implements GameInterface,Runnable{
 
 	
 	private void GameUpated(){
-		user_waches.forEach(a -> {a.GameUpdated();});
+		user_watches.forEach(a -> {a.GameUpdated(this);});
 		
-		players.forEach(a -> {a.GameUpdated();});
-		WantToJoinPlayers.forEach(a -> {a.GameUpdated();});;
+		players.forEach(a -> {a.GameUpdated(this);});
 		
 	}
 	public void run() {
 		
-		while(playersNumber > 0){
+		while(activePlayersNumber > 0){
 			
 			ExchangeWaitingPlayers();
 			GameUpated();
-			while (playersNumber > 1){
+			while (activePlayersNumber > 1){
 				ExchangeWaitingPlayers();
 				GameUpated();
 				initTableForNewTurn();
@@ -603,47 +683,57 @@ public class Game implements GameInterface,Runnable{
 		cashOnTheTable = 0;
 		table = new Card[5];
 		cardsOnTable = 0;
-		players.get(blindBit).takeMoney(preferences.getMinBet() / 2);
-		players.get(((blindBit + 1) % playersNumber)).takeMoney(preferences.getMinBet());
-		blindBit = (blindBit+1) % playersNumber;
+		activePlayers.get(blindBit).takeMoney(preferences.getMinBet() / 2);
+		activePlayers.get(((blindBit + 1) % activePlayersNumber)).takeMoney(preferences.getMinBet());
+		blindBit = (blindBit+1) % activePlayersNumber;
 		dealCardsForPlayers();
 		log_game.addLog("Cards Dealed For the Players, And BlinBet Was Betted And The Game Starting");
 	}
 
 	private void ExchangeWaitingPlayers() {
-		for(int i=0;i<WantToJoinPlayers.size();i++){
-			players.add(WantToJoinPlayers.poll());
-			playersNumber++;
-			
+		activePlayers = new LinkedList<Player>();
+		activePlayersNumber = 0;
+		for(Player ppp:players){
+			if(preferences.checkPlayer(ppp))
+			{activePlayers.add(ppp);
+			activePlayersNumber++;
+			}
+			else {
+				leaveGame(ppp.getUser());
+				
+			}
 		}
-		log_game.addLog(WantToJoinPlayers.size()+" Players Waiting for playing was Inserted To The list of The Active Players");
+		
+		log_game.addLog(" Players Waiting for playing was Inserted To The list of The Active Players");
 	}
 	
 	private void oneTurn() {
 		int RoundNumber = 0;
 		int currentPlayer = 1;
 		int played = 1;
-           
-		while(RoundNumber < 4 && playersNumber > 1) {
+		isCalled= false;
+		while(RoundNumber < 4 && activePlayersNumber > 1) {
 			log_game.addLog("Round number: "+ RoundNumber + " Started");
-			CurrentBet = preferences.getMinBet();
-			while(played < playersNumber - folded.size()) {
-				Player current = players.get((blindBit + currentPlayer) % playersNumber);
+			CurrentBet = 0;
+			if(RoundNumber == 0) CurrentBet = preferences.getMinBet(); 
+			while(played < activePlayersNumber) {
+				Player current = activePlayers.get((blindBit + currentPlayer) % activePlayersNumber);
 				int prevCashOnTheTable = cashOnTheTable;
 				CurrentPlayer = current;
 					if(!current.takeAction()){
-						current.leaveGame();
-						
+						leaveGame(current.getUser());
 					}
 					else if (cashOnTheTable > prevCashOnTheTable + CurrentBet) {
 						played = 1; 
 						CurrentBet=cashOnTheTable - prevCashOnTheTable;
+						isCalled = true;
 					}
 					else played++;
 					
 					currentPlayer++;
 					GameUpated();
 				}
+			isCalled=false;
 			CurrentPlayer = null;
 				played = 0;
 				if(RoundNumber == 0) dealCardsForTable(3);
@@ -656,5 +746,7 @@ public class Game implements GameInterface,Runnable{
 		log_game.addLog("One Turn Done");
 
 		}
+
+
 	}
 

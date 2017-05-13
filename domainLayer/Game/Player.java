@@ -8,13 +8,12 @@ public class Player implements PlayerInterface{
 	 private Card[] hand;
 	 private int cash;
 	 private UserInterface User;
-	 private GameInterface Game;
-	 public Player (int cash,UserInterface User,GameInterface Game){
+	 public Player (int cash,UserInterface User){
 		 
 		 this.cash = cash;
 		 this.User = User;
-		 this.Game = Game;
 		 hand = new Card[2];
+
 		 
 	 }
 	 public UserInterface getUser(){
@@ -31,8 +30,8 @@ public class Player implements PlayerInterface{
 	 /**
 	  * This method will be used by the Game to tell the player that the game updated, The player object will notify the user for this to update him
 	  */
-	 public void GameUpdated(){
-		 User.GameUpdated();
+	 public void GameUpdated(GameInterface game){
+		 User.GameUpdated(game);
 		 
 	 }
 	 
@@ -47,44 +46,10 @@ public class Player implements PlayerInterface{
 		 
 	 }
 	 
-	 /**
-	  * this method will be used by the user to make fold action, the player object will notify the game for this
-	  * @return true if the player can do this action in the current time, else  (this is not his turn, or he is not playing)return false
-	  */
-	 public boolean fold(){
-		 if(Game!=null)return  Game.fold(this);
-		 else return false;
-		 
-		 
-	 }
+
 	 
-	 /**
-	  * this method will be used by the user to make check action, the player object will notify the game for this
-	  * @return true if the player can do this action in the current time, else  (this is not his turn, or he is not playing, or there's another player batted)return false
-	  */
-	 public boolean check(){
-		 if(Game!=null)return  Game.check(this);
-		 else return false;
 
-	 }
-	 /**
-	  * this method will be used by the user to make bet action, the player object will notify the game for this
-	  * @return true if the player can do this action in the current time, else  (this is not his turn, or he is not playing, or there's another player batted more the @money, or he hasn't this amount of money)return false
-	  */
-	 public boolean bet(int money){
-		
-		 if(Game!=null) return Game.bet(this,money);
-		 else return false;
 
-	 }
-	 /**
-	  * this method will be used by the user to make leaveGame action, the player object will notify the game for this
-	  * @return true if the player can do this action in the current time, else return false
-	  */
-	 public boolean leaveGame(){
-		 Game.leaveGame(this);
-		 return false;
-	 }
 	 
 	 /**
 	  * This method will be used by the Game to give the player money that he win, The player object notify the User about this
@@ -113,8 +78,4 @@ public class Player implements PlayerInterface{
 		return true;
 	}
 	
-	public GameInterface getGame() {
-		return Game;
-	}
-
 }
