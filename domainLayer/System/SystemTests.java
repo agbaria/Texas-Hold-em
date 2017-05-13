@@ -8,7 +8,7 @@ import user.UserStatus;
 
 public class SystemTests {
 
-	GmaeCenterInterface GCI=GameCenter.getInstance();
+	GameCenterInterface GCI=GameCenter.getInstance();
 	
 
 	

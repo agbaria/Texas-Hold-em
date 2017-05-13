@@ -3,48 +3,66 @@ package user;
 import java.util.LinkedList;
 
 import Game.Game;
+import Game.GameInterface;
 import Game.Player;
 import Game.Enum.GameType;
 
 public interface UserInterface {
 
-	public void GameUpdated();
-
-    public void editPassword(String newPassword);
-	
-	public void editName(String newName);
-	
-	public void editEmail(String newEmail);
-
-	public boolean takeAction();
-
-
-	public boolean fold();
-
-	public String getName();
-	public int geTotalCash();
-	public boolean check();
-
-	public boolean bet(int money);
-
-	public boolean leaveGame(Player player);
 	public void getLog(LinkedList<String> i_game_logs);
-	public void getLog(String i_game_logs);
-
-
-	public boolean giveMoney(int money);
-
-
-
-	public boolean createGame(Player player, GameType type, int buyIn, int chipPolicy, int minBet, 
-			   int minPlayers, int maxPlayers, boolean spectatable);
-
-
-	public LinkedList<Game> Search(String playerName,int potSize);
-
-	public boolean joinGame(Player player);
 	
-    public void login();
+	public void getLog(String  i_game_logs);
 	
-	public void logout();
+	public void editName(String newName) ;
+	
+	public void editEmail(String newEmail) ;
+	
+	public void editPassword(String newPassword) ;
+	
+	public String getID() ;
+
+	public void setID(String iD) ;
+
+	public String getName() ;
+
+	public void setName(String name) ;
+
+	public String getEmail() ;
+
+	public void setEmail(String email) ;
+
+	public String getPassword() ;
+
+	public void setPassword(String password) ;
+
+	public int getTotalCash() ;
+
+	public void setTotalCash(int totalCash) ;
+
+	public int getScore() ;
+
+	public void setScore(int score) ;
+
+	public UserStatus getStatus() ;
+
+	public void setStatus(UserStatus status) ;
+
+	public int getLeague() ;
+
+	public void setLeague(int league) ;
+
+
+	public void GameUpdated(GameInterface game) ;
+
+
+	public boolean takeAction() ;
+
+
+
+	public boolean giveMoney(int money) ;
+
+
+	public boolean addPlayer(Player player) ;
+
+	public boolean removePlayer(Player player) ;
 }

@@ -17,7 +17,7 @@ public class GameTest {
 	public void testRun() {
 		GamePreferences prefs;
 		try {
-			prefs = new GamePreferences(GameType.NO_LIMIT, 0, 1000, 100, 2, 8, true);
+			prefs = new GamePreferences(GameType.NO_LIMIT, 0, 1000, 100, 2, 8, true,false,0);
 		}
 		catch(Exception e) {
 			return;

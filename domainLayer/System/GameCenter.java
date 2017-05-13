@@ -8,22 +8,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import Game.Game;
+import Game.GameInterface;
 import Game.GamePreferences;
 import Game.Player;
 import Game.Enum.GameType;
 import user.User;
 import user.UserInterface;
+import user.UserStatus;
 
-public class GameCenter implements GmaeCenterInterface{
+public class GameCenter implements GameCenterInterface{
    private  ConcurrentLinkedQueue<User> users; 
    private ConcurrentLinkedQueue<Game> games;
 
-   private static GmaeCenterInterface singleton = new GameCenter( );
+   private static GameCenterInterface singleton = new GameCenter( );
    private LinkedList<GameLogs> game_logs;
    private final static Logger LOGGER = Logger.getLogger(GameCenter.class.getName());
    private AtomicInteger gameIdGen;
    
-   public static GmaeCenterInterface getInstance( ) {
+   public static GameCenterInterface getInstance( ) {
 	      return singleton;
 	   }
    
@@ -81,7 +83,7 @@ public class GameCenter implements GmaeCenterInterface{
 		     LOGGER.info("Error: the password is too short");
 		     return false;
 		   }
-	   newUser=new User(ID, password, name, email, 0, 0);
+	   newUser=new User(ID, password, name, email, 0, 0,-1);
 	   addUser(newUser);
 	   return true;
    }
@@ -92,59 +94,40 @@ public class GameCenter implements GmaeCenterInterface{
 	   
    }
    
-   public void saveFavoriteGame(int GameID){
-	   
-	   for(Game i_game : games){
-		   if(i_game.getGameID()==GameID)
-			   game_logs.add(i_game.getGameLog());			   
-		   
-	   }
-   }
+
    
-	public void replaySavedTurn(int GameID, UserInterface user){
-		   
-		   for(GameLogs i_game_logs : game_logs){
-			   if(i_game_logs.getGameID()==GameID){
-				   user.getLog(i_game_logs.getLog());
-			   }
-				   			   
-			   
-		   }
-	   }
+
 	
-	public void addUserToSpectatingGame (int GameID, UserInterface user){
-		   
-		   for(Game i_game : games){
-			   if(i_game.getGameID()==GameID){
-				  i_game.AddUserToWatch(user);
-			   }
-				   			   
-			   
-		   }
-	}
-   
+
    
    /**
     * in this function please see the Create game requirement in the Assignment 1 and add the relevant params according to the game preferences, 
     * @param user
     * @return true if the user can init game with the giver preferences, 
     */
-   public boolean createGame(Player player, GameType type, int buyIn, int chipPolicy, int minBet, 
-		   int minPlayers, int maxPlayers, boolean spectatable){
+   public boolean createGame(String UserID, GameType type,int Limit, int buyIn, int chipPolicy, int minBet, 
+		   int minPlayers, int maxPlayers, boolean spectatable,boolean leaguable){
 	   
 	   GamePreferences preferences;
+	   UserInterface creator = getUser(UserID);
 	   try {
-		   preferences = new GamePreferences(type, buyIn, chipPolicy, minBet, minPlayers, maxPlayers, spectatable);
+		   preferences = new GamePreferences(type,Limit, buyIn, chipPolicy, minBet, minPlayers, maxPlayers, spectatable,leaguable,creator.getLeague());
 	   }
 	   catch(Exception e) {
 		   LOGGER.info("Error: game pregerences don't match requirements");
 		   return false;
 	   }
 	   
-	   Game newGame = new Game(player, preferences, gameIdGen.getAndIncrement());
+	   Game newGame = new Game(preferences, gameIdGen.getAndIncrement()+"");
 	   games.add(newGame);
-	   newGame.run();
-	   
+	   if(joinGame(newGame.getGameID(),UserID)){
+		   Thread th = new Thread(newGame);
+		   th.start();
+		   return true;
+	   }
+	   else{
+		   games.remove(newGame);
+	   }
 	   return false;
    }
    
@@ -154,137 +137,241 @@ public class GameCenter implements GmaeCenterInterface{
     * @param potSize
     * @return
     */
-   public LinkedList<Game> Search(String playerName,int potSize){
+   public LinkedList<Game> searchGamesByPotSize(int potSize){
 	   
 	  LinkedList<Game> can_join = new LinkedList<Game>();
-	  if(playerName.equals("")&& potSize==-1){
-		  for(Game i_game : games){
-			 can_join.add(i_game);			 
-		  }
-	  }
-	  else if(playerName.equals("")&& potSize!=-1){
-		  for(Game i_game : games){
-			  if(i_game.getPlayerNumber()==potSize){
-				 can_join.add(i_game);	
-			  }
-		  }
-		  
-	  }else if(!playerName.equals("")&& potSize==-1){
+
 		  for(Game i_game : games){			 
-			  Player [] players = i_game.getPlayers();
-			  for(Player p : players){
-				 if(p.getUser().getName().equals(playerName)){
+			  
+				 if(i_game.getpreferences().getGameTypePolicy()==GameType.POT_LIMIT && i_game.getpreferences().getLimit()==potSize){
 					  can_join.add(i_game);
-				 }
-			  }
-		  }
-		  
-		  
-	  }else{
-		  for(Game i_game : games){			 
-			  Player [] players = i_game.getPlayers();
-			  for(Player p : players){
-				 if(p.getUser().getName().equals(playerName) && i_game.getPlayerNumber()==potSize){
-					  can_join.add(i_game);
-				 }
-			  }
-		  }
-	  }
+				 
+			  }}
+
 		  
 	  return  can_join;
    }
    
-   public boolean joinGame(Game game, Player player){
+   public LinkedList<Game> searchGamesByPrefs(GamePreferences userPrefs){
+	   
+	  LinkedList<Game> can_join = new LinkedList<Game>();
+
+		  for(Game i_game : games){			 
+			  
+				 if(userPrefs.checkEquality(i_game.getpreferences())){
+					  can_join.add(i_game);
+				 
+			  }}
+
+		  
+	  return  can_join;
+   }
+   
+   
+   public LinkedList<Game> searchGamesByPlayerName(String name){
+	   
+	  LinkedList<Game> can_join = new LinkedList<Game>();
+
+		  for(Game i_game : games){			 
+			  Player[] p = i_game.getPlayers();
+			  for(Player pp : p){
+				 if(pp.getUser().getName().equals(name)){
+					  can_join.add(i_game);
+					  break;
+				 }
+			  }}
+
+		  
+	  return  can_join;
+   }
+   
+   public LinkedList<Game> listJoinableGames(String UserID){
+	   UserInterface user = getUser(UserID);
+	   LinkedList<Game> can_join = new LinkedList<Game>();
+	   for(Game game : games){
+		   if(game.isJoinAbleGame(user))
+			   can_join.add(game);
+		   
+		   
+	   }
+	   
+	   return can_join;
+	   
+   }
+   
+   public LinkedList<Game> listSpectatableGames(){
+	   LinkedList<Game> can_join = new LinkedList<Game>();
+	   for(Game game : games){
+		   if(game.getpreferences().isSpectatable())
+			   can_join.add(game);
+		   
+		   
+	   }
+	   
+	   return can_join;
+	   
+   }
+   
+   public boolean spectateGame(String UserID,String GameID){
+	   GameInterface game = getGameByID(GameID);
+	   UserInterface user = getUser(UserID);
+	   if(user !=null && game!=null)
+	   return game.spectate(user);
+       return false;
+   }
+   
+   public boolean joinGame(String gameID, String UserID){
+	   GameInterface game = getGameByID(gameID);
+	   UserInterface user = getUser(UserID);
+	   if(game!=null && user !=null){
+		   
+		   return false;
+		   
+	   }
 	   
 	   return false;
    }
    
+   
+   public GameInterface getGameByID(String gameID){
+	   for(Game game : games){
+		   if(game.getGameID().equals(gameID))
+		     return game;
+		   
+	   }
+	   return null;
+	   
+	   
+   }
 
-public boolean editUserPassword(String userID, String newPassword) {
-	if(newPassword.isEmpty())
-		{
-		  LOGGER.warning("Error: empty password is invalid");
-		  return false;
+	public boolean editUserPassword(String userID, String newPassword) {
+		if(newPassword.isEmpty()) {
+			  LOGGER.warning("Error: empty password is invalid");
+			  return false;
 		}
-	if(newPassword.length()<8)
-		{
-		  LOGGER.info("Error: the password is too short");
-		  return false;
+		if(newPassword.length() < 8) {
+			  LOGGER.info("Error: the password is too short");
+			  return false;
 		}
-	
-	for (User usr : users) {
-	     if(usr.getID().equals(userID))
-	     {
-	    	usr.editPassword(newPassword);
-	    	break;
-	     }
-	    }
-	return true;
-}
+		for (User usr : users) {
+		     if(usr.getID().equals(userID)) {
+		    	usr.editPassword(newPassword);
+		    	return true;
+		    	
+		     }
+		}
+		return false;
+	}
 
-public boolean editUserName(String userID, String newName) {
-	if(newName.isEmpty())
-		{
-		  LOGGER.info("Error: empty name is invalid");
-		  return false;
+	public boolean editUserName(String userID, String newName) {
+		if(newName.isEmpty()) {
+			  LOGGER.info("Error: empty name is invalid");
+			  return false;
 		}
-	
-	for (User usr : users) {
-	     if(usr.getID().equals(userID))
-	     {
-	    	usr.editName(newName);
-	    	break;
-	     }
-	    }
-	return true;
-}
+		
+		for (User usr : users) {
+		     if(usr.getID().equals(userID)) {
+		    	usr.editName(newName);
+		    	return true;
+		     }
+		}
+		return false;
+	}
 
-public boolean editUserEmail(String userID, String newEmail) {
-	if(newEmail.isEmpty())
-		{
-		  LOGGER.info("Error: empty email is invalid");
-		  return false;
+	public boolean editUserEmail(String userID, String newEmail) {
+		if(newEmail.isEmpty()) {
+			  LOGGER.info("Error: empty email is invalid");
+			  return false;
 		}
-	if(!isValidEmailAddress(newEmail))
-	{    
-		LOGGER.info("Error: invalid email address");
-		 return false;
+		if(!isValidEmailAddress(newEmail)) {    
+			LOGGER.info("Error: invalid email address");
+			 return false;
+		}
+		for (User usr : users) {
+		     if(usr.getID().equals(userID)) {
+		    	usr.editEmail(newEmail);
+		    	return true;
+		     }
+		}
+		return false;
+	}
+
+	public boolean login(String ID, String password) {
+		for (User usr : users) {
+		     if(usr.getID().equals(ID)) {
+		    	 if(usr.getPassword().equals(password)) {
+		    		 usr.setStatus(UserStatus.CONNECTED);
+		    		 return true;
+		    	 }
+		    	 else {
+		    		 LOGGER.info("Error: incorrect password");
+		    		 return false;
+		    	 }
+		     }
+		}
+		LOGGER.info("Error: unrecognize id");
+		return false;
 	}
 	
-	for (User usr : users) {
-	     if(usr.getID().equals(userID))
-	     {
-	    	usr.editEmail(newEmail);
-	    	break;
-	     }
-	    }
-	return true;
-}
+	public void logout(String ID) {
+		User user = getUser(ID);
+		if(user!=null){
+		for(Game g: games){
+			
+			leaveGame(g.getGameID(),ID);
+			
+		}
+	     user.setStatus(UserStatus.DISCONNECTED);
+	 		
+		
+		}
+		}
+	
+	
+	
+	public boolean leaveGame(String GameID,String UserID){
+		
+		   Game game = (Game)getGameByID(GameID);
+		   User user = getUser(UserID);
+           return game.leaveGame(user);
 
-public boolean login(String ID, String password) {
-	for (User usr : users) {
-	     if(usr.getID().equals(ID))
-	     {
-	    	 if(usr.getPassword().equals(password))
-	    	 {
-	    	  usr.login();
-	          return true;
-	    	 }
-	    	 else
-	    	 {
-	    		 LOGGER.info("Error: incorrect password");
-	    		 return false;
-	    	 }
-	     }
-	    }
-	LOGGER.info("Error: unrecognize id");
-	return false;
-}
+	}
 
-public void logout(String ID) {
-	for (User usr : users) 
-	   if(usr.getID().equals(ID))
-         usr.logout();
-}
+	public boolean check(String userID, String gameID) {
+		GameInterface game = getGameByID(gameID);
+		User user = getUser(userID);
+		if(game != null && user != null) {
+			return game.check(user);
+		}
+		return false;
+	}
+
+	public boolean bet(String userID, String gameID, int money) {
+		GameInterface game = getGameByID(gameID);
+		User user = getUser(userID);
+		if(game != null && user != null) {
+			return game.bet(user, money);
+		}
+		return false;
+	}
+
+	public boolean fold(String userID, String gameID) {
+		GameInterface game = getGameByID(gameID);
+		User user = getUser(userID);
+		if(game != null && user != null) {
+			return game.fold(user);
+		}
+		return false;
+	}
+
+	public boolean raise(String userID, String gameID, int money) {
+		return bet(userID, gameID, money);
+	}
+
+	public boolean call(String userID, String gameID, int money) {
+		return bet(userID, gameID, money);
+	}
+	
+	
 
 }
