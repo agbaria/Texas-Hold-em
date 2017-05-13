@@ -5,9 +5,9 @@ import java.util.LinkedList;
 
 
 public class GameLogs {
-	private int IDGame;
+	private String IDGame;
 	 LinkedList<String> log = new LinkedList<String>();
-	 public GameLogs(int IDGame){
+	 public GameLogs(String IDGame){
 		 this.IDGame = IDGame;
 		 
 	 }
@@ -18,7 +18,7 @@ public class GameLogs {
 	 public LinkedList<String> getLog(){
 		 return log;
 	 }
-	 public int getGameID(){
+	 public String getGameID(){
 		 return IDGame;
 	 }
 	 
