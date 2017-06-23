@@ -1,4 +1,6 @@
 /Game/
+/System/
 /communicationLayer/
 /serviceLayer/
+/tests/
 /user/

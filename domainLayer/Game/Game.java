@@ -330,27 +330,48 @@ public boolean isJoinAbleGame(UserInterface p){
 				return result;
 			result = FourOfAKind();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************FourOfAKind**********************************");
 				return result;
+			}
 			result = FullHouse();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************FullHouse**********************************");
 				return result;
+			}
 			result = Flush();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************Flush**********************************");
 				return result;
+			}
 			result = Straight();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************Straight**********************************");
 				return result;
+			}
 			result = ThreeOFKind();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************ThreeOFKind**********************************");
 				return result;
+			}
 			result = TwoPair();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************TwoPair**********************************");
 				return result;
+			}
 			result = OnePair();
 			if(result!= null && result.length !=0)
+			{
+				System.out.println("************************************OnePair**********************************");
 				return result;
+			}
 			result = HighCard();
-			
+			System.out.println("************************************HighCard**********************************");
 			log_game.addLog("The Winners In This Round: "+ result.toString());
 			return result;
 			
@@ -590,28 +611,44 @@ public boolean isJoinAbleGame(UserInterface p){
 	private Player[] OnePair(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
+		int maxPair=0;
 		for(int i=0;i<activePlayers.size();i++){
 			if(activePlayers.get(i).getCards()[0].getNumber() == activePlayers.get(i).getCards()[1].getNumber()){
-				result.add(activePlayers.get(i));
+				if(activePlayers.get(i).getCards()[0].getNumber()>maxPair)
+				{
+				  result.clear();
+				  result.add(activePlayers.get(i));
+				}
+				if(activePlayers.get(i).getCards()[0].getNumber()==maxPair)
+					result.add(activePlayers.get(i));
 			}
 			else{
 				for(int j=0;j<table.length;j++){
 					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					{
-						result.add(activePlayers.get(i));
-						break;}
+						if(activePlayers.get(i).getCards()[0].getNumber()>maxPair)
+						{
+						  result.clear();
+						  result.add(activePlayers.get(i));
+						}
+						if(activePlayers.get(i).getCards()[0].getNumber()==maxPair)
+							result.add(activePlayers.get(i));
+						}
 				}
-				if(!result.contains(activePlayers.get(i))){
 	
 					for(int j=0;j<table.length;j++){
 						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
-							{result.add(activePlayers.get(i));
-						break;}
-						
-					}
-				}
-				
-				
+						{
+							if(activePlayers.get(i).getCards()[1].getNumber()>maxPair)
+							{
+							  result.clear();
+							  result.add(activePlayers.get(i));
+							}
+							if(activePlayers.get(i).getCards()[1].getNumber()==maxPair)
+								result.add(activePlayers.get(i));
+							}
+					   }
+
 			}
 			
 			
@@ -665,16 +702,85 @@ public boolean isJoinAbleGame(UserInterface p){
 		return result;
 	}
 	
-	private Player[] Straight(){
-		Player [] result = null;
 	
-          
-
+	private Player[] Straight(){
+		LinkedList<Player> result = new LinkedList<Player>();
+		
+		if(table.length<3)
+			return null;
+		int [] tempArray;
+		int maxStraight=0;
+		for(int i=0;i<activePlayers.size();i++){
+			tempArray=append(activePlayers.get(i).getCards(), table);
+			bubbleSort(tempArray);
+			int firstInSeq=isFiveSequence(tempArray);
+			if(isFiveSequence(tempArray)!=0)
+			{
+				if(firstInSeq > maxStraight)
+				{
+				maxStraight=firstInSeq;
+				result.clear();
+				result.add(activePlayers.get(i));
+				}
+				if(firstInSeq == maxStraight)
+					result.add(activePlayers.get(i));
+			}
+		}
+		
 		 
-		 
-		 
-		return result;
+		return  result.toArray(new Player[result.size()]);
 	}
+	
+	private int[] append(Card [] arr1, Card [] arr2)
+	{
+		int [] arr=new int[arr1.length+arr2.length];
+				int i;
+		for(i=0; i<arr1.length; i++)
+			arr[i]=arr1[i].getNumber();
+		for(int j=i; j<arr.length; j++)
+			arr[j]=arr2[j-i].getNumber();
+		return arr;
+	}    
+	
+	private int isFiveSequence(int [] arr)
+	{
+		int counter=0, numOfDuplicates=0;
+		int firstInSeq=0;
+		
+		for(int i=0; i<arr.length-1; i++)
+		{
+			
+			if(arr[i]+1==arr[i+1])
+				counter++;
+			else if(arr[i]==arr[i+1])
+				numOfDuplicates++;
+			else
+			{
+				counter=0;
+				numOfDuplicates=0;
+			}
+			if(counter>=4)
+				firstInSeq=arr[i-3-numOfDuplicates];
+			if(counter==3 && arr[i+1]==13 && arr[0]==1)
+				firstInSeq=10;
+		}
+		return firstInSeq;
+	}
+	
+	 private void bubbleSort(int[] arr) {
+	      int n = arr.length;
+	      int temp = 0;
+	      for(int i = 0; i < n; i++) {
+	         for(int j=1; j < (n-i); j++) {
+	            if(arr[j-1] > arr[j]) { 
+	               temp = arr[j-1]; 
+	               arr[j-1] = arr[j];
+	               arr[j] = temp;
+	            } 
+	         } 
+	      } 
+	   }  
+
 
 	
 	private synchronized void GameUpated(){
@@ -793,14 +899,14 @@ public boolean isJoinAbleGame(UserInterface p){
 				Player current = activePlayers.get((blindBit + currentPlayer) % activePlayersNumber);
 				int minumumBet = CurrentBet - this.playerToBet.get(current) > 0 ? CurrentBet - this.playerToBet.get(current) : 0;
 				int minBet=minumumBet;
-				if(minBet==0);
+				if(minBet==0)
 				   minBet=this.preferences.getMinBet();
 				
 				int prevCashOnTheTable = cashOnTheTable;
 				CurrentPlayer = current;
 				GameUpated();
 				if(RoundNumber != 0 && CurrentBet>0 && minumumBet == 0)break; 
-					if(!current.takeAction(this.GameID,minBet)){
+					if(!current.takeAction(this.GameID, minBet)){
 						leaveGame(current.getUser());
 					}
 					else if (cashOnTheTable > prevCashOnTheTable + minumumBet) {
