@@ -526,9 +526,10 @@ public boolean isJoinAbleGame(UserInterface p){
 	private Player[] TwoPair(){
 
 		LinkedList<Player> result = new LinkedList<Player>();
+		boolean isOnePair;
 		for(int i=0;i<activePlayers.size();i++){
 			if(activePlayers.get(i).getCards()[0].getNumber() != activePlayers.get(i).getCards()[1].getNumber()){
-				boolean isOnePair = false;
+				 isOnePair = false;
 				for(int j=0;j<table.length;j++){
 					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					{
@@ -543,11 +544,8 @@ public boolean isJoinAbleGame(UserInterface p){
 						break;}
 						
 					}
-				}
-				
-				
+				}	
 			}
-			
 			
 		}
 		
@@ -614,21 +612,27 @@ public boolean isJoinAbleGame(UserInterface p){
 		int maxPair=0;
 		for(int i=0;i<activePlayers.size();i++){
 			if(activePlayers.get(i).getCards()[0].getNumber() == activePlayers.get(i).getCards()[1].getNumber()){
-				if(activePlayers.get(i).getCards()[0].getNumber()>maxPair)
+				if(activePlayers.get(i).getCards()[0].getNumber()>maxPair || activePlayers.get(i).getCards()[0].getNumber()==1)
 				{
-				  result.clear();
+					if(maxPair!=14)
+						  result.clear();
+				  maxPair=activePlayers.get(i).getCards()[0].getNumber();
+				  if(maxPair==1) maxPair=14;
 				  result.add(activePlayers.get(i));
 				}
 				if(activePlayers.get(i).getCards()[0].getNumber()==maxPair)
 					result.add(activePlayers.get(i));
 			}
-			else{
+			
 				for(int j=0;j<table.length;j++){
 					if(table[j].getNumber()==activePlayers.get(i).getCards()[0].getNumber())
 					{
-						if(activePlayers.get(i).getCards()[0].getNumber()>maxPair)
+						if(activePlayers.get(i).getCards()[0].getNumber()>maxPair || activePlayers.get(i).getCards()[0].getNumber()==1)
 						{
-						  result.clear();
+							if(maxPair!=14)
+								  result.clear();
+							maxPair=activePlayers.get(i).getCards()[0].getNumber();
+						  if(maxPair==1) maxPair=14;
 						  result.add(activePlayers.get(i));
 						}
 						if(activePlayers.get(i).getCards()[0].getNumber()==maxPair)
@@ -639,9 +643,12 @@ public boolean isJoinAbleGame(UserInterface p){
 					for(int j=0;j<table.length;j++){
 						if(table[j].getNumber()==activePlayers.get(i).getCards()[1].getNumber())
 						{
-							if(activePlayers.get(i).getCards()[1].getNumber()>maxPair)
+							if(activePlayers.get(i).getCards()[1].getNumber()>maxPair || activePlayers.get(i).getCards()[0].getNumber()==1)
 							{
-							  result.clear();
+								if(maxPair!=14)
+									  result.clear();
+							  maxPair=activePlayers.get(i).getCards()[1].getNumber();
+							  if(maxPair==1) maxPair=14;
 							  result.add(activePlayers.get(i));
 							}
 							if(activePlayers.get(i).getCards()[1].getNumber()==maxPair)
@@ -649,9 +656,6 @@ public boolean isJoinAbleGame(UserInterface p){
 							}
 					   }
 
-			}
-			
-			
 		}
 		
 		return  result.toArray(new Player[result.size()]);
