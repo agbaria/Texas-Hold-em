@@ -87,6 +87,10 @@ public class Game implements GameInterface, Runnable{
 		return log_game;
 	}
 	
+	public String getGameReplay(){
+		return log_game.getGameDescription();
+	}
+	
 	public Player[] getPlayers(){
 		Player[] array = new Player[players.size()];
 		for(int i = 0; i < players.size(); i++) array[i] = players.get(i);
@@ -138,7 +142,7 @@ public class Game implements GameInterface, Runnable{
 		}
 		
 		if(!preferences.checkPlayer(player)){
-			log_game.addLog(player.getUser().getName() + "failed to joing this Game because of his total cash");
+			log_game.addLog(player.getUser().getName() + " failed to joing this Game because of his total cash");
 			return false;
 		}
 		
@@ -147,7 +151,7 @@ public class Game implements GameInterface, Runnable{
 
 					players.add(player);
 					player.takeMoney(preferences.getBuyInPolicy());
-					log_game.addLog(player.getUser().getName() + "Joined The Game");
+					log_game.addLog(player.getUser().getName() + " Joined The Game");
 					return true;
 				}
 				else return false;
@@ -221,22 +225,22 @@ public boolean isJoinAbleGame(UserInterface p){
 		if(player == CurrentPlayer){
 		activePlayers.remove(player);
 		activePlayersNumber--;
-		log_game.addLog(user.getName() + "Fold for This round");
+		log_game.addLog(user.getName() + " Fold for This round");
 		user.actionMaked(this.GameID);
 		return true;}
-		log_game.addLog(user.getName() + "Failed to fold");
+		log_game.addLog(user.getName() + " Failed to fold");
 		return false;
 	}
 	
 	public synchronized boolean check(UserInterface user) {
 		Player player =getPlayerByUser(user);
 		if(player == CurrentPlayer && !isCalled && this.playerToBet.get(player) >= this.CurrentBet){
-		log_game.addLog(user.getName() + "Checked for This Round");
+		log_game.addLog(user.getName() + " Checked for This Round");
 		user.actionMaked(this.GameID);
 		return true;}
 		else {
 			
-			log_game.addLog(user.getName() + "Failed To Check");
+			log_game.addLog(user.getName() + " Failed To Check");
 			return false;
 		}
 	}
@@ -245,7 +249,7 @@ public boolean isJoinAbleGame(UserInterface p){
 		Player player =getPlayerByUser(user);
 		if(player !=null &&player.getCash() >= money && money>=CurrentBet - this.playerToBet.get(player) && player == CurrentPlayer&&player.takeMoney(money))
 		 {cashOnTheTable += money;
-		 log_game.addLog(user.getName() + "Betted for This Round: "+ money);
+		 log_game.addLog(user.getName() + " Betted for This Round: "+ money);
 		 if(this.playerToBet.containsKey(player)){
 			 playerToBet.replace(player, playerToBet.get(player) + money);
 		 }
@@ -254,7 +258,7 @@ public boolean isJoinAbleGame(UserInterface p){
 		 }
 		 user.actionMaked(this.GameID);
 		return true;}
-		log_game.addLog(user.getName() + "Failed To Bet");
+		log_game.addLog(user.getName() + " Failed To Bet");
 		return false;
 	}
 	
@@ -266,7 +270,7 @@ public boolean isJoinAbleGame(UserInterface p){
 				if(activePlayers.indexOf(player) <= blindBit) 
 					if(blindBit == 0) blindBit = activePlayers.size() -1;
 					else blindBit --;
-				log_game.addLog(player.getUser().getName() + "Left The Game");
+				log_game.addLog(player.getUser().getName() + " Left The Game");
 				activePlayersNumber--;
 				activePlayers.removeFirstOccurrence(player);
 			
@@ -281,7 +285,7 @@ public boolean isJoinAbleGame(UserInterface p){
 			Card card2 = deck.getCard();
 			if(card1 == null || card2 == null) return false;
 			activePlayers.get(i).giveCards(card1, card2);
-			log_game.addLog(activePlayers.get(i).getUser().getName() + " got this cards: "+ card1.getNumber() + "of Kind: " + card1.getType()+" And "+ card2.getNumber() + " of Kind: " + card2.getType());
+			log_game.addLog(activePlayers.get(i).getUser().getName() + " got this cards: "+ card1.getNumber() + " of Kind: " + card1.getType()+" And "+ card2.getNumber() + " of Kind: " + card2.getType());
 			
 		}
 		if (activePlayers.size() <2) return false; 
@@ -298,7 +302,7 @@ public boolean isJoinAbleGame(UserInterface p){
 			if(card1 == null ) return false;
                 table[i] = card1;
                 
-    			log_game.addLog("New Card to The Table"+ card1.getNumber() + "of Kind: " + card1.getType());
+    			log_game.addLog("New Card to The Table "+ card1.getNumber() + " of Kind: " + card1.getType());
 
 			
 		}
@@ -331,54 +335,61 @@ public boolean isJoinAbleGame(UserInterface p){
 			result = FourOfAKind();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************FourOfAKind**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with FourOfAKind"); 
 				return result;
 			}
 			result = FullHouse();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************FullHouse**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with FullHouse"); 
 				return result;
 			}
 			result = Flush();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************Flush**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with Flush"); 
 				return result;
 			}
 			result = Straight();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************Straight**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with Straight"); 
 				return result;
 			}
 			result = ThreeOFKind();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************ThreeOFKind**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with ThreeOFKind");
 				return result;
 			}
 			result = TwoPair();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************TwoPair**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with TwoPair");
 				return result;
 			}
 			result = OnePair();
 			if(result!= null && result.length !=0)
 			{
-				System.out.println("************************************OnePair**********************************");
+				log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with OnePair");
 				return result;
 			}
 			result = HighCard();
-			System.out.println("************************************HighCard**********************************");
-			log_game.addLog("The Winners In This Round: "+ result.toString());
+			log_game.addLog("The Winners In This Round: "+ getPlayersNames(result) + " with HighCard"); 
 			return result;
 			
 		} 
 		 
 		 
 		 
+		return result;
+	}
+	
+	private String getPlayersNames(	Player [] players)
+	{
+		String result="";
+		for(int i=0; i<players.length; i++)
+			result+=players[i].getUser().getName()+", ";
 		return result;
 	}
 	
@@ -793,12 +804,31 @@ public boolean isJoinAbleGame(UserInterface p){
 		players.forEach(a -> {a.GameUpdated(this);});
 
 	}
+	
 	public void SendMSG(String msg){
 		user_watches.forEach(a -> {a.SendMSG(msg);});
 		
 		players.forEach(a -> {a.SendMSG(msg);});
 
 	}
+	
+	public void WhisperMSG(String msg, String receiverID){
+		
+		for(Player p : this.players)
+			if(p.getUser().getID().equals(receiverID))
+			{
+				p.SendMSG(msg);
+				break;
+			}
+		for(Spectator sp : this.user_watches)
+			if(sp.getUser().getID().equals(receiverID))
+			{
+				sp.SendMSG(msg);
+				break;
+			}
+
+	}
+	
 	public void run() {
 		try {
 			ExchangeWaitingPlayers();
@@ -887,7 +917,7 @@ public boolean isJoinAbleGame(UserInterface p){
 			}
 		}
 		
-		log_game.addLog(" Players Waiting for playing was Inserted To The list of The Active Players");
+	//	log_game.addLog(" Players Waiting for playing was Inserted To The list of The Active Players");
 	}
 	
 	private void oneTurn() {

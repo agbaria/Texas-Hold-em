@@ -219,6 +219,11 @@ public class GameCenter implements GameCenterInterface{
 	   GameInterface game = getGameByID(gameID);
 	   UserInterface user = getUser(UserID);
 	   if(game!=null && user !=null){
+		   if(game.getPlayerNumber()==0)
+		   {
+		   Thread th = new Thread((Game)game);
+		   th.start();
+		   }
 		   return game.joinGame(user);
 		   
 	   }
@@ -404,10 +409,32 @@ public class GameCenter implements GameCenterInterface{
 			
 			if(p.getUser().getID().equals(UserID)){
 				currentGame.SendMSG(MsgParts);
-				
+				break;
 			}
 			
 		}
+	}
+	
+	public void WhisperMsg(String GameID, String UserID, String receiverID, String MsgParts){
+		
+		Game currentGame = (Game) getGameByID(GameID);
+		if(currentGame!=null)
+		for(Player p:currentGame.getPlayers()){
+			
+			if(p.getUser().getID().equals(UserID)){
+				currentGame.WhisperMSG(MsgParts, receiverID);
+				break;
+			}
+			
+		}
+	}
+	
+	public String getGameReplay(String gameID)
+	{
+		for(Game g: this.games)
+			if(g.getGameID().equals(gameID))
+				return g.getGameReplay();
+		return null;
 	}
 
 }

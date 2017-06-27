@@ -33,4 +33,9 @@ public interface GameInterface {
 	 public boolean joinGame(UserInterface p);
 		public boolean spectate(UserInterface p);
 		public boolean isJoinAbleGame(UserInterface p);
+		/**
+		 * 
+		 * @return the number of players in game
+		 */
+		public int getPlayerNumber();
 }

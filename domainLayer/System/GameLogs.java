@@ -22,4 +22,12 @@ public class GameLogs {
 		 return IDGame;
 	 }
 	 
+	 public String getGameDescription(){
+		 String description="";
+		 for(String action: log)
+			 description+=action+"&";
+		 return description;
+	 }
+	 
+	 
 }

@@ -152,7 +152,17 @@ public	String Action(String action);
  */
 public void ChatMsg(String action);
 
+/**
+ * 
+ * @param msg is string that has this format: "WHISPERMSG *GameID* *UserID* *reciverID* *MSG*"
+ */
+public void WhisperMsg(String msg);
 
-
+/**
+ * 
+ * @param request
+ * @return
+ */
+public String ReplayGame(String request);
 	
 }

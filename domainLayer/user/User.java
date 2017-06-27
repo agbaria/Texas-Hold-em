@@ -151,7 +151,6 @@ public class User implements UserInterface {
 	}
 
 	public void SendMSG(String game){
-		
 		this.handler.send(game);
 		
 	}
