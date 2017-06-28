@@ -3,6 +3,7 @@ package serviceLayer;
 import java.util.LinkedList;
 import Game.Card;
 import Game.Game;
+import Game.GameInterface;
 import Game.GamePreferences;
 import Game.Player;
 import Game.Enum.GameType;
@@ -517,6 +518,13 @@ public class serviceLayer implements serviceLayerInterface {
 				 return "GAMEREPLAY FAILED Can't replay the game";
 		        }
 		   return "GAMEREPLAY FAILED Can't replay the game";
+	}
+	
+	public void updateGame(String gameID)
+	{
+		GameInterface game=gameCenter.getGameByID(gameID);
+		if(game!=null)
+		game.GameUpated();
 	}
 	
 

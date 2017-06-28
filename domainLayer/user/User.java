@@ -9,6 +9,7 @@ import Game.Card;
 import Game.Game;
 import Game.GameInterface;
 import Game.Player;
+import Game.Spectator;
 import communicationLayer.ConnectionHandler;
 
 public class User implements UserInterface {
@@ -170,6 +171,11 @@ public class User implements UserInterface {
 			String hand = getCardsPlayer(players, i);
 			
 			result = result+players[i].getUser().getID()+","+ players[i].getUser().getName()+"," +players[i].getUser().getTotalCash()+","+ hand+","+players[i].getUser().getAvatar()+",";
+		}
+		result = result + "&spectators=";
+		Spectator [] spectators= game.getSpectators();
+		for(int i=0;i<spectators.length;i++){
+			result = result+spectators[i].getUser().getID()+","+ spectators[i].getUser().getName()+",";
 		}
 		result = result + "&blindBit="+game.getBlindBit();
 		if(game.getCurrentPlayer()!=null) result = result+"&CurrentPlayer="+game.getCurrentPlayer().getUser().getID();

@@ -164,5 +164,11 @@ public void WhisperMsg(String msg);
  * @return
  */
 public String ReplayGame(String request);
+
+/**
+ * 
+ * @param gameID
+ */
+public void updateGame(String gameID);
 	
 }

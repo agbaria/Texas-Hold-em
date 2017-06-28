@@ -38,4 +38,14 @@ public interface GameInterface {
 		 * @return the number of players in game
 		 */
 		public int getPlayerNumber();
+		
+		/**
+		 * 
+		 */
+		public void GameUpated();
+		
+		/**
+		 * 
+		 */
+		public void initializeGame();
 }

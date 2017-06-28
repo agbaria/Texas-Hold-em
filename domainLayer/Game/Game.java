@@ -65,6 +65,20 @@ public class Game implements GameInterface, Runnable{
 		playerToBet = new HashMap<Player,Integer>();
 	}
 	
+	public void initializeGame(){
+		isCalled = false;
+		CurrentPlayer = null;
+		activePlayers = new LinkedList<Player>();
+		players = new LinkedList<Player>();
+		deck = new Deck();
+		deck.shuffle();
+		activePlayersNumber = 0;
+		table = new Card[5];
+		cardsOnTable = 0;
+		blindBit = 0;
+		playerToBet = new HashMap<Player,Integer>();
+	}
+	
 	public int getPlayerNumber(){
 		return players.size();
 	}
@@ -102,6 +116,11 @@ public class Game implements GameInterface, Runnable{
 		for(int i = 0; i < activePlayers.size(); i++) array[i] = activePlayers.get(i);
 		return array;
 		//return activePlayers.toArray(new Player[activePlayers.size()]);
+	}
+	public Spectator[] getSpectators(){
+		Spectator[] array = new Spectator[user_watches.size()];
+		for(int i = 0; i < user_watches.size(); i++) array[i] = user_watches.get(i);
+		return array;
 	}
 
 	
@@ -219,6 +238,20 @@ public boolean isJoinAbleGame(UserInterface p){
 		
 	}
 	
+	private Spectator getSpectatorByUser(UserInterface user){
+		for(Spectator spc: user_watches)
+		{
+			if(spc.getUser().getID().equals(user.getID())){
+	
+				return spc;}
+			
+			
+		}
+
+		return null;
+		
+	}
+	
 	public synchronized boolean fold(UserInterface user) {
 		Player player =getPlayerByUser(user);
 		
@@ -274,6 +307,12 @@ public boolean isJoinAbleGame(UserInterface p){
 				activePlayersNumber--;
 				activePlayers.removeFirstOccurrence(player);
 			
+			}
+			Spectator spectator=getSpectatorByUser(user);
+			if(user_watches.contains(spectator))
+			{
+				found =  this.user_watches.remove(spectator);
+				log_game.addLog("The spectator " + spectator.getUser().getName() + " Left the game");
 			}
 			return found;
 		
@@ -798,18 +837,23 @@ public boolean isJoinAbleGame(UserInterface p){
 
 
 	
-	private synchronized void GameUpated(){
+	public synchronized void GameUpated(){
 		user_watches.forEach(a -> {a.GameUpdated(this);});
 		
 		players.forEach(a -> {a.GameUpdated(this);});
 
 	}
 	
-	public void SendMSG(String msg){
+	public void SendMSG(String msg, String userType){
+		if(userType.equals("player"))
+		{
 		user_watches.forEach(a -> {a.SendMSG(msg);});
-		
 		players.forEach(a -> {a.SendMSG(msg);});
-
+		}
+		else if(userType.equals("spectator"))
+		{
+		user_watches.forEach(a -> {a.SendMSG(msg);});
+		}
 	}
 	
 	public void WhisperMSG(String msg, String receiverID){

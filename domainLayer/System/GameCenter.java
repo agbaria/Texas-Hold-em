@@ -11,6 +11,7 @@ import Game.Game;
 import Game.GameInterface;
 import Game.GamePreferences;
 import Game.Player;
+import Game.Spectator;
 import Game.Enum.GameType;
 import communicationLayer.ConnectionHandler;
 import user.User;
@@ -221,6 +222,7 @@ public class GameCenter implements GameCenterInterface{
 	   if(game!=null && user !=null){
 		   if(game.getPlayerNumber()==0)
 		   {
+		   game.initializeGame();
 		   Thread th = new Thread((Game)game);
 		   th.start();
 		   }
@@ -404,11 +406,23 @@ public class GameCenter implements GameCenterInterface{
 	public void ChatMsg(String GameID, String UserID, String MsgParts){
 		
 		Game currentGame = (Game) getGameByID(GameID);
+		String userType=null;
 		if(currentGame!=null)
 		for(Player p:currentGame.getPlayers()){
 			
 			if(p.getUser().getID().equals(UserID)){
-				currentGame.SendMSG(MsgParts);
+				userType="player";
+				currentGame.SendMSG(MsgParts, userType);
+				break;
+			}
+			
+		}
+		if(userType==null && currentGame!=null)
+        for(Spectator s:currentGame.getSpectators()){
+			
+			if(s.getUser().getID().equals(UserID)){
+				userType="spectator";
+				currentGame.SendMSG(MsgParts, userType);
 				break;
 			}
 			
@@ -418,15 +432,26 @@ public class GameCenter implements GameCenterInterface{
 	public void WhisperMsg(String GameID, String UserID, String receiverID, String MsgParts){
 		
 		Game currentGame = (Game) getGameByID(GameID);
+		boolean isPlayer=false;
 		if(currentGame!=null)
 		for(Player p:currentGame.getPlayers()){
 			
 			if(p.getUser().getID().equals(UserID)){
 				currentGame.WhisperMSG(MsgParts, receiverID);
+				isPlayer=true;
 				break;
 			}
 			
 		}
+		if(!isPlayer && currentGame!=null)
+	        for(Spectator s:currentGame.getSpectators()){
+				
+				if(s.getUser().getID().equals(UserID)){
+					currentGame.WhisperMSG(MsgParts, receiverID);
+					break;
+				}
+				
+			}
 	}
 	
 	public String getGameReplay(String gameID)

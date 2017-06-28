@@ -147,6 +147,7 @@ public class MyServerProtocol implements ServerProtocol<String>{
 		else if(parts[0].equals("SPECTATEGAME")){
 	        if(this.name!=null&&parts[2].equals(name)){
 	        	callback.sendMessage(serviceLayerr.spectateGame(msg));
+	        	serviceLayerr.updateGame(parts[1]);
 			
 	        }
 	        else{
@@ -156,6 +157,7 @@ public class MyServerProtocol implements ServerProtocol<String>{
 		else if(parts[0].equals("LEAVEGAME")){ 
 	        if(this.name!=null&&parts[2].equals(name)){
 	        	callback.sendMessage(serviceLayerr.leaveGame(msg));
+	        	serviceLayerr.updateGame(parts[1]);
 			
 	        }
 	        else{
