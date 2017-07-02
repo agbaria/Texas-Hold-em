@@ -3,6 +3,12 @@ package user;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import com.sun.istack.internal.logging.Logger;
 
 import Game.Card;
@@ -12,69 +18,113 @@ import Game.Player;
 import Game.Spectator;
 import communicationLayer.ConnectionHandler;
 
+@Entity
+@Table(name="users")
 public class User implements UserInterface {
+
 	
+	@Id
+	@Column(name="id")
 	private	String ID;
+	
+	@Column(name="name")
+	private String name;
+	
+	@Column(name="email")
+	private String email;
+	
+	@Column(name="password")
+	private String encryptedPassword;
+	
+	@Column(name="totalCash")
+	private int totalCash;
+	
+	@Column(name="score")
+	private int score;
+	
+	@Column(name="league")
+	private int league;
+	
+	@Column(name="avatar")
+	private String avatar;
+	
+	private int gamesPlayed;
+	private int highestWin; // The highest cash gain in a game
+	private int accumulatedWin; // The sum of cash gained in games
+
+
+	@Transient
+	private UserStatus status;
+	
+	@Transient
+	Logger my_log;
+	
+	@Transient
+	private boolean isWaitingForAction;
+	
+	@Transient
+	private HashMap<String, Boolean> isWaitingForActionMap;
+	
+	@Transient
+	private ConnectionHandler handler;
+
+	public User(){
+		
+	}
+	
+	
+/*	
+	
+	// persistent fields
+	// all persistent fields must be private and have setters & getters
+	private String ID;
 	private String name;
 	private String email;
-	private String password;
-	private int totalCash;
-	private int score;
-	private UserStatus status;
-	private int league;
 	private String avatar;
-	Logger my_log;
+	private String encryptedPassword;
+	private int totalCash; // total gross profit
+	private int score;
+	private int league;
+	private int gamesPlayed;
+	private int highestWin; // The highest cash gain in a game
+	private int accumulatedWin; // The sum of cash gained in games
+
+	// non-persistent fields
+	private UserStatus status;
 	private boolean isWaitingForAction;
 	private HashMap<String, Boolean> isWaitingForActionMap;
 	private ConnectionHandler handler;
-
-	public User(String ID, String password, String name, String email, int totalCash, int score, int league,String avatar){
+	Logger my_log;
+*/
+	public User(String ID, String encPass, String name, String email, int totalCash, int score, int league,
+			String avatar) {
 		this.ID = ID;
-		this.password=password;
 		this.name = name;
 		this.email = email;
-		this.totalCash = totalCash ;
+		this.avatar = avatar;
+		this.encryptedPassword = encPass;
+		this.totalCash = totalCash;
 		this.score = score;
-		isWaitingForAction=false;
-		status = UserStatus.DISCONNECTED;
-		my_log = Logger.getLogger(User.class);
-		isWaitingForActionMap = new HashMap<String,Boolean>();
 		this.league = league;
-		this.setAvatar(avatar);
+		this.gamesPlayed = 0;
+		this.highestWin = 0;
+		this.accumulatedWin = 0;
+
+		status = UserStatus.DISCONNECTED;
+		isWaitingForAction = false;
+		isWaitingForActionMap = new HashMap<String, Boolean>();
+		handler = null;
+		my_log = Logger.getLogger(User.class);
 	}
-	
-	public void getLog(LinkedList<String> i_game_logs){
-		
-		   for(String s :i_game_logs){
-			   my_log.info(s);
-		   }
-	}
-	
-	public void getLog(String  i_game_logs){
-		 
-		  
-		 my_log.info(i_game_logs);
-		  
-	}
-	
-	public void editName(String newName) {
-		this.name = newName;
-	}
-	
-	public void editEmail(String newEmail) {
-		this.email = newEmail;
-	}
-	
-	public void editPassword(String newPassword) {
-		this.password = newPassword;
-	}
-	
+
+	// setters&getters
+
 	public String getID() {
 		return ID;
 	}
 
-	public void setID(String iD) {
-		ID = iD;
+	public void setID(String id) {
+		this.ID = id;
 	}
 
 	public String getName() {
@@ -93,12 +143,20 @@ public class User implements UserInterface {
 		this.email = email;
 	}
 
-	public String getPassword() {
-		return password;
+	public String getAvatar() {
+		return avatar;
 	}
 
-	public void setPassword(String password) {
-		this.password = password;
+	public void setAvatar(String avatar) {
+		this.avatar = avatar;
+	}
+
+	public String getEncryptedPassword() {
+		return encryptedPassword;
+	}
+
+	public void setEncryptedPassword(String encryptedPassword) {
+		this.encryptedPassword = encryptedPassword;
 	}
 
 	public int getTotalCash() {
@@ -117,14 +175,6 @@ public class User implements UserInterface {
 		this.score = score;
 	}
 
-	public UserStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(UserStatus status) {
-		this.status = status;
-	}
-
 	public int getLeague() {
 		return league;
 	}
@@ -133,131 +183,211 @@ public class User implements UserInterface {
 		this.league = league;
 	}
 
+	public int getGamesPlayed() {
+		return gamesPlayed;
+	}
+
+	public void setGamesPlayed(int gamesPlayed) {
+		this.gamesPlayed = gamesPlayed;
+	}
+
+	public int getHighestWin() {
+		return highestWin;
+	}
+
+	public void setHighestWin(int highestWin) {
+		this.highestWin = highestWin;
+	}
+
+	public int getAccumulatedWin() {
+		return accumulatedWin;
+	}
+
+	public void setAccumulatedWin(int accumulatedWin) {
+		this.accumulatedWin = accumulatedWin;
+	}
+
+	public UserStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(UserStatus status) {
+		this.status = status;
+	}
+
+	public void getLog(LinkedList<String> i_game_logs) {
+
+		for (String s : i_game_logs) {
+			my_log.info(s);
+		}
+	}
+
+	public void getLog(String i_game_logs) {
+
+		my_log.info(i_game_logs);
+
+	}
+
+	public void editName(String newName) {
+		this.name = newName;
+	}
+
+	public void editEmail(String newEmail) {
+		this.email = newEmail;
+	}
+
+	public void editPassword(String newPassword) {
+		this.encryptedPassword = newPassword;
+	}
+
 	/**
-	 * HNAD= *TYPE,NUMBER,TYPE,NUMBER*
-	 * *AVATAR*=STRING
-	 * CASH= *NUMBER*
-	 * PLAYERS = "*PLAYER USER NAME*,*PLAYER NAME*,*CASH*,*HAND*,*AVATAR* "{0,n}
+	 * HNAD= *TYPE,NUMBER,TYPE,NUMBER* *AVATAR*=STRING CASH= *NUMBER* PLAYERS =
+	 * "*PLAYER USER NAME*,*PLAYER NAME*,*CASH*,*HAND*,*AVATAR* "{0,n}
 	 * 
 	 * CARDS = "*CARD NUMBER* *CARD TYPE* "{0,n}
 	 * 
-	 * GAME FULL DETAILS= "GameID=*ID*&players=*PLAYERS*&activePlayers=*PLAYERS*&blindBit=*NUMBER*&CurrentPlayer=*PLAYER USER NAME*&
+	 * GAME FULL DETAILS=
+	 * "GameID=*ID*&players=*PLAYERS*&activePlayers=*PLAYERS*&blindBit=*NUMBER*&CurrentPlayer=*PLAYER
+	 * USER NAME*&
 	 * table=*CARDS*&MaxPlayers=*NUMBER*&activePlayersNumber=*NUMBER*&cashOnTheTable=*NUMBER*&CurrentBet=*NUMBER*"
-	 * this function sends GAMEUPDATED message to the client "GAMEUPDATE *GAME FULL DETAILS*"
+	 * this function sends GAMEUPDATED message to the client "GAMEUPDATE *GAME
+	 * FULL DETAILS*"
 	 */
 	public void GameUpdated(GameInterface game) {
-		if(handler !=null&&this.status == UserStatus.CONNECTED)
-		this.handler.send("GAMEUPDATE "+GameToString((Game)game));
-		
+		if (handler != null && this.status == UserStatus.CONNECTED)
+			this.handler.send("GAMEUPDATE " + GameToString((Game) game));
+
 	}
 
-	public void SendMSG(String game){
+	public void SendMSG(String game) {
 		this.handler.send(game);
-		
-	}
-	private String GameToString(Game game){
 
-		String result="GameID="+game.getGameID();
-		result= result+"&players=";
-		Player[] players= game.getPlayers();
-		for(int i=0;i<players.length;i++){
+	}
+
+	private String GameToString(Game game) {
+
+		String result = "GameID=" + game.getGameID();
+		result = result + "&players=";
+		Player[] players = game.getPlayers();
+		for (int i = 0; i < players.length; i++) {
 			String hand = getCardsPlayer(players, i);
-			
-			result = result+players[i].getUser().getID()+","+ players[i].getUser().getName()+"," +players[i].getUser().getTotalCash()+","+ hand+","+players[i].getUser().getAvatar()+",";
+
+			result = result + players[i].getUser().getID() + "," + players[i].getUser().getName() + ","
+					+ players[i].getUser().getTotalCash() + "," + hand + "," + players[i].getUser().getAvatar() + ",";
 		}
 		result = result + "&activePlayers=";
-		 players= game.getActivePlayers();
-		for(int i=0;i<players.length;i++){
+		players = game.getActivePlayers();
+		for (int i = 0; i < players.length; i++) {
 			String hand = getCardsPlayer(players, i);
-			
-			result = result+players[i].getUser().getID()+","+ players[i].getUser().getName()+"," +players[i].getUser().getTotalCash()+","+ hand+","+players[i].getUser().getAvatar()+",";
+
+			result = result + players[i].getUser().getID() + "," + players[i].getUser().getName() + ","
+					+ players[i].getUser().getTotalCash() + "," + hand + "," + players[i].getUser().getAvatar() + ",";
 		}
 		result = result + "&spectators=";
-		Spectator [] spectators= game.getSpectators();
-		for(int i=0;i<spectators.length;i++){
-			result = result+spectators[i].getUser().getID()+","+ spectators[i].getUser().getName()+",";
+		Spectator[] spectators = game.getSpectators();
+		for (int i = 0; i < spectators.length; i++) {
+			result = result + spectators[i].getUser().getID() + "," + spectators[i].getUser().getName() + ",";
 		}
-		result = result + "&blindBit="+game.getBlindBit();
-		if(game.getCurrentPlayer()!=null) result = result+"&CurrentPlayer="+game.getCurrentPlayer().getUser().getID();
-		else result = result+"&CurrentPlayer=";
-		//result = result + game.getCurrentPlayer()!=null ? "&CurrentPlayer="+game.getCurrentPlayer().getUser().getID(): "&CurrentPlayer=";
+		result = result + "&blindBit=" + game.getBlindBit();
+		if (game.getCurrentPlayer() != null)
+			result = result + "&CurrentPlayer=" + game.getCurrentPlayer().getUser().getID();
+		else
+			result = result + "&CurrentPlayer=";
+		// result = result + game.getCurrentPlayer()!=null ?
+		// "&CurrentPlayer="+game.getCurrentPlayer().getUser().getID():
+		// "&CurrentPlayer=";
 		result = result + "&table=";
-		
-		for(int i=0;i<game.getCardsOnTable();i++){
-			
-			result = result+game.getTable()[i].getNumber()+","+ game.getTable()[i].getType()+",";
+
+		for (int i = 0; i < game.getCardsOnTable(); i++) {
+
+			result = result + game.getTable()[i].getNumber() + "," + game.getTable()[i].getType() + ",";
 
 		}
-		result = result + "&MaxPlayers="+game.getpreferences().getMaxPlayersNum();
-		result = result + "&cashOnTheTable="+game.getCashOnTheTable();
-		result = result + "&CurrentBet="+game.getCurrentBet();
+		result = result + "&MaxPlayers=" + game.getpreferences().getMaxPlayersNum();
+		result = result + "&cashOnTheTable=" + game.getCashOnTheTable();
+		result = result + "&CurrentBet=" + game.getCurrentBet();
 		return result;
 	}
 
 	private String getCardsPlayer(Player[] players, int i) {
-		String hand =""; 
-		Card[]	PlayerCards=	players[i].getCards();
-		if(PlayerCards[0]!=null&&PlayerCards[1]!=null){
-			hand +=PlayerCards[0].getType()+" "+PlayerCards[0].getNumber()+" ";
-			hand+=PlayerCards[1].getType()+" "+PlayerCards[1].getNumber();
-		}
-		else{
-			hand+="NULL NULL NULL NULL";
+		String hand = "";
+		Card[] PlayerCards = players[i].getCards();
+		if (PlayerCards[0] != null && PlayerCards[1] != null) {
+			hand += PlayerCards[0].getType() + " " + PlayerCards[0].getNumber() + " ";
+			hand += PlayerCards[1].getType() + " " + PlayerCards[1].getNumber();
+		} else {
+			hand += "NULL NULL NULL NULL";
 		}
 		return hand;
 	}
+
 	/**
-	 * this function sends TAKEACTION request to the client to make some action "TAKEACTION *GAME ID*"
+	 * this function sends TAKEACTION request to the client to make some action
+	 * "TAKEACTION *GAME ID*"
 	 */
 	@Override
-	public boolean takeAction(String GameID,int minBit) {
-		if(this.handler!=null&&this.status == UserStatus.CONNECTED){
-		if(this.isWaitingForActionMap.containsKey(GameID))return false;
-		else{
-			
-			this.isWaitingForActionMap.put(GameID, true);
+	public boolean takeAction(String GameID, int minBit) {
+		if (this.handler != null && this.status == UserStatus.CONNECTED) {
+			if (this.isWaitingForActionMap.containsKey(GameID))
+				return false;
+			else {
+
+				this.isWaitingForActionMap.put(GameID, true);
+			}
+
+			this.handler.send("TAKEACTION " + GameID + " " + minBit);
+			while (this.isWaitingForActionMap.get(GameID))
+				;
+			this.isWaitingForActionMap.remove(GameID);
+			return true;
 		}
-		
-		
-		this.handler.send("TAKEACTION "+GameID+" "+minBit);
-		while(this.isWaitingForActionMap.get(GameID));
-		this.isWaitingForActionMap.remove(GameID);
-		return true;
-	}
-	return false;
-}
-	@Override
-	public boolean changeMoney(int money) {
-		if(totalCash  + money >0){
-		totalCash+=money;
-		return true;}
 		return false;
 	}
 
-
-
+	@Override
+	public boolean changeMoney(int money) {
+		if (totalCash + money > 0) {
+			totalCash += money;
+			return true;
+		}
+		return false;
+	}
 
 	public void giveHandler(ConnectionHandler handler) {
-	    this.handler = handler;
+		this.handler = handler;
 	}
 
 	@Override
 	public void actionMaked(String GameID) {
-		if(this.isWaitingForActionMap.containsKey(GameID)){
-		this.isWaitingForActionMap.replace(GameID, false);
+		if (this.isWaitingForActionMap.containsKey(GameID)) {
+			this.isWaitingForActionMap.replace(GameID, false);
 		}
 	}
-	public boolean isWaiting(){
-		
+
+	public boolean isWaiting() {
+
 		return this.isWaitingForAction;
 	}
 
-	public String getAvatar() {
-		return avatar;
+	@Override
+	public void updateGamesPlayed() {
+		this.gamesPlayed++;
 	}
 
-	public void setAvatar(String avatar) {
-		this.avatar = avatar;
+	@Override
+	public void updateHighestWin(int win) {
+		if (win > this.highestWin)
+			this.highestWin = win;
 	}
 
+	@Override
+	public void updateAccumulatedWin(int win) {
+		this.accumulatedWin += win;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		User u = (User) obj;
+		return this.ID.equals(u.getID());
+	}
 }

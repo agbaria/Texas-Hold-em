@@ -1,6 +1,7 @@
-/communicationLayer/
-/tests/
-/Game/
 /System/
 /user/
-/serviceLayer/
+/dbLayer/
+/hibernate.cfg.xml
+/hibernate.cfg.out.xml
+/ORM/
+/communicationLayer/

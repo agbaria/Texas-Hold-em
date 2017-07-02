@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jun 21, 2017 12:50:30 AM by Hibernate Tools 3.5.0.Final -->
+<hibernate-mapping>
+    <class name="Persistent.User" table="users">
+        <id name="ID" type="java.lang.String">
+            <column name="id" />
+        </id>
+        <property name="name" type="java.lang.String">
+            <column name="name" />
+        </property>
+        <property name="email" type="java.lang.String">
+            <column name="email" />
+        </property>
+        <property name="avatar" type="java.lang.String">
+            <column name="avatar" />
+        </property>
+        <property name="encryptedPassword" type="java.lang.String">
+            <column name="password" />
+        </property>
+        <property name="totalCash" type="int">
+            <column name="totalCash" />
+        </property>
+        <property name="score" type="int">
+            <column name="score" />
+        </property>
+        <property name="league" type="int">
+            <column name="league" />
+        </property>
+        <property name="gamesPlayed" type="int">
+            <column name="gamesPlayed" />
+        </property>
+        <property name="highestWin" type="int">
+            <column name="highestWin" />
+        </property>
+        <property name="accumulatedWin" type="int">
+            <column name="accumulatedWin" />
+        </property>
+    </class>
+</hibernate-mapping>
