@@ -1,12 +1,7 @@
-/Game/
-/ORM/
 /System/
-/communicationLayer/
-/dbLayer/
-/serviceLayer/
-/tests/
 /user/
-/Persistent/
-/Resources/
-/cfg.xml
+/dbLayer/
 /hibernate.cfg.xml
+/hibernate.cfg.out.xml
+/ORM/
+/communicationLayer/

@@ -225,7 +225,7 @@ public class UsersTable {
 			session.close();
 		}
 	}
-	
+
 	public static List<User> getTopStatBy(String c) {
 		List<User> users = null;
 		Session session = sessionFactory.openSession();
@@ -233,7 +233,7 @@ public class UsersTable {
 		try {
 			tx = session.beginTransaction();
 
-			String query = "SELECT TOP 20 * FROM USER ORDER BY " + c + " asc";
+			String query = "SELECT * FROM users ORDER BY " + c + " desc LIMIT 20";
 			NativeQuery<User> q = session.createNativeQuery(query, User.class);
 			users = q.getResultList();
 
@@ -248,7 +248,7 @@ public class UsersTable {
 
 		return users;
 	}
-	
+
 	public static void TestConnection() {
 		String jdbcUrl = "jdbc:mysql://localhost:3306/poker_db?useSSL=false";
 		String user = "poker";
@@ -268,17 +268,25 @@ public class UsersTable {
 		}
 
 	}
+/*
+	public static void main(String[] args) {
 
-	/*
-	 * public static void main(String[] args) {
-	 * 
-	 * TestConnection(); StoreUser(new User("4534","passwor43d", "na543me",
-	 * "em453ail", 999, 999, 999,"avatar")); RemoveUser("2");
-	 * System.out.println(GetUser("13"));
-	 * System.out.println(GetAllUsers().size()); UpdateUserEmail("1" , "aa@aa");
-	 * UpdateUserName("4" , "akjf"); UpdateUserTotalCash("6" , "80");
-	 * UpdateUserScore("7" , "800"); UpdateUserLeague("8" , "3");
-	 * UpdateUserAvatar("9" , "www"); System.out.println(CompairePasswords("1",
-	 * "Password")); System.out.println(CompairePasswords("1", "password")); }
-	 */
+		//TestConnection();
+		for (int i=0;i<50;i++){
+		StoreUser(new User("hf"+Math.random()*10020, "passwor43d", "na543me", "em453ail", (int)(Math.random()*100), (int)(Math.random()*100),(int)(Math.random()*100), "avatar"));
+		}
+//		RemoveUser("2");
+//		System.out.println(GetUser("13"));
+//		System.out.println(GetAllUsers().size());
+//		UpdateUserEmail("1", "aa@aa");
+		
+//		UpdateUserName("4", "akjf");
+//		UpdateUserTotalCash("6", "80");
+//		UpdateUserScore("7", "800");
+//		UpdateUserLeague("8", "3");
+//		UpdateUserAvatar("9", "www");
+//		System.out.println(CompairePasswords("1", "Password"));
+//		System.out.println(CompairePasswords("1", "password"));
+	}
+*/
 }

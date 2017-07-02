@@ -87,8 +87,8 @@ public class GameCenter implements GameCenterInterface {
 		String encPswd = sha1(password);
 		if (encPswd != null) {
 			newUser = new User(ID, encPswd, name, email, 5000, 0, -1, avatar);
-			// UsersTable.StoreUser(newUser);
-			addUser(newUser);
+			UsersTable.StoreUser(newUser);
+			// addUser(newUser);
 			return true;
 		} else
 			return false;
@@ -310,33 +310,43 @@ public class GameCenter implements GameCenterInterface {
 	}
 
 	public boolean login(String ID, String password, ConnectionHandler handler) {
-		for (User usr : users) {
-			if (usr.getID().equals(ID)) {
-				if (usr.getEncryptedPassword().equals(sha1(password))) {
-					usr.setStatus(UserStatus.CONNECTED);
-					usr.giveHandler(handler);
-					return true;
-				} else {
-					LOGGER.info("Error: incorrect password");
-					return false;
-				}
+		/*
+		 * for (User usr : users) { if (usr.getID().equals(ID)) { if
+		 * (usr.getEncryptedPassword().equals(sha1(password))) {
+		 * usr.setStatus(UserStatus.CONNECTED); usr.giveHandler(handler); return
+		 * true; } else { LOGGER.info("Error: incorrect password"); return
+		 * false; } } } LOGGER.info("Error: unrecognize id"); return false;
+		 */
+
+		User user = UsersTable.GetUser(ID);
+		if (user != null) {
+			String encPass = sha1(password);
+			if (user.getEncryptedPassword().equals(encPass)) {
+				user.setStatus(UserStatus.CONNECTED);
+				user.giveHandler(handler);
+				addUser(user);
+				return true;
+			} else {
+				LOGGER.info("Error: incorrect password");
+				return false;
 			}
 		}
 		LOGGER.info("Error: unrecognize id");
 		return false;
 
-		/*
-		 * User user = UsersTable.GetUser(ID); if (user != null) { String
-		 * encPass = sha1(password); if
-		 * (user.getEncryptedPassword().equals(encPass)) {
-		 * user.setStatus(UserStatus.CONNECTED); user.giveHandler(handler);
-		 * addUser(user); return true; } else {
-		 * LOGGER.info("Error: incorrect password"); return false; } }
-		 * LOGGER.info("Error: unrecognize id"); return false;
-		 */
 	}
 
 	public void logout(String ID) {
+		/*
+		 * User user = getUser(ID); if (user != null) { for (Game g : games) {
+		 * 
+		 * leaveGame(g.getGameID(), ID);
+		 * 
+		 * } user.setStatus(UserStatus.DISCONNECTED);
+		 * 
+		 * }
+		 */
+
 		User user = getUser(ID);
 		if (user != null) {
 			for (Game g : games) {
@@ -345,17 +355,10 @@ public class GameCenter implements GameCenterInterface {
 
 			}
 			user.setStatus(UserStatus.DISCONNECTED);
-
+			UsersTable.UpdateUser(user);
+			users.remove(user);
 		}
 
-		/*
-		 * User user = getUser(ID); if (user != null) { for (Game g : games) {
-		 * 
-		 * leaveGame(g.getGameID(), ID);
-		 * 
-		 * } user.setStatus(UserStatus.DISCONNECTED);
-		 * UsersTable.UpdateUser(user); users.remove(user); }
-		 */
 	}
 
 	public boolean leaveGame(String GameID, String UserID) {
@@ -549,7 +552,7 @@ public class GameCenter implements GameCenterInterface {
 			stat = (user.getTotalCash() * 1.0) / user.getGamesPlayed();
 
 		String name = user.getName();
-		
-		return "{\"name\": \"" + name + "\", \"stat\": " + stat + "}";
+
+		return "{\"name\": \"" + name + "\", \"stat\": \"" + stat + "\"}";
 	}
 }

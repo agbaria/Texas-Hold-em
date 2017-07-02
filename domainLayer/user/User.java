@@ -2,7 +2,12 @@ package user;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.sun.istack.internal.logging.Logger;
 
@@ -13,8 +18,63 @@ import Game.Player;
 import Game.Spectator;
 import communicationLayer.ConnectionHandler;
 
+@Entity
+@Table(name="users")
 public class User implements UserInterface {
 
+	
+	@Id
+	@Column(name="id")
+	private	String ID;
+	
+	@Column(name="name")
+	private String name;
+	
+	@Column(name="email")
+	private String email;
+	
+	@Column(name="password")
+	private String encryptedPassword;
+	
+	@Column(name="totalCash")
+	private int totalCash;
+	
+	@Column(name="score")
+	private int score;
+	
+	@Column(name="league")
+	private int league;
+	
+	@Column(name="avatar")
+	private String avatar;
+	
+	private int gamesPlayed;
+	private int highestWin; // The highest cash gain in a game
+	private int accumulatedWin; // The sum of cash gained in games
+
+
+	@Transient
+	private UserStatus status;
+	
+	@Transient
+	Logger my_log;
+	
+	@Transient
+	private boolean isWaitingForAction;
+	
+	@Transient
+	private HashMap<String, Boolean> isWaitingForActionMap;
+	
+	@Transient
+	private ConnectionHandler handler;
+
+	public User(){
+		
+	}
+	
+	
+/*	
+	
 	// persistent fields
 	// all persistent fields must be private and have setters & getters
 	private String ID;
@@ -25,7 +85,7 @@ public class User implements UserInterface {
 	private int totalCash; // total gross profit
 	private int score;
 	private int league;
-	private AtomicInteger gamesPlayed;
+	private int gamesPlayed;
 	private int highestWin; // The highest cash gain in a game
 	private int accumulatedWin; // The sum of cash gained in games
 
@@ -35,7 +95,7 @@ public class User implements UserInterface {
 	private HashMap<String, Boolean> isWaitingForActionMap;
 	private ConnectionHandler handler;
 	Logger my_log;
-
+*/
 	public User(String ID, String encPass, String name, String email, int totalCash, int score, int league,
 			String avatar) {
 		this.ID = ID;
@@ -46,7 +106,7 @@ public class User implements UserInterface {
 		this.totalCash = totalCash;
 		this.score = score;
 		this.league = league;
-		this.gamesPlayed = new AtomicInteger(0);
+		this.gamesPlayed = 0;
 		this.highestWin = 0;
 		this.accumulatedWin = 0;
 
@@ -124,11 +184,11 @@ public class User implements UserInterface {
 	}
 
 	public int getGamesPlayed() {
-		return gamesPlayed.get();
+		return gamesPlayed;
 	}
 
 	public void setGamesPlayed(int gamesPlayed) {
-		this.gamesPlayed.set(gamesPlayed);
+		this.gamesPlayed = gamesPlayed;
 	}
 
 	public int getHighestWin() {
@@ -311,7 +371,7 @@ public class User implements UserInterface {
 
 	@Override
 	public void updateGamesPlayed() {
-		this.gamesPlayed.incrementAndGet();
+		this.gamesPlayed++;
 	}
 
 	@Override

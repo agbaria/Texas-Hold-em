@@ -7,7 +7,7 @@ import Game.Enum.CardType;
 public class Main {
 	public static void main(String[] args) throws IOException {
 		System.out.println(CardType.CLUBS);
-		// runThreadPerClient(args);
+		 runThreadPerClient(args);
 		runHttpsServer(args);
 	}
 
@@ -22,11 +22,11 @@ public class Main {
 		ThreadPerClientServer server = new ThreadPerClientServer(port);
 		Thread serverThread = new Thread(server);
 		serverThread.start();
-		try {
-			serverThread.join();
-		} catch (InterruptedException e) {
-			System.out.println("Server stopped");
-		}
+//		try {
+//			serverThread.join();
+//		} catch (InterruptedException e) {
+//			System.out.println("Server stopped");
+//		}
 	}
 
 	private static void runHttpsServer(String[] args) {

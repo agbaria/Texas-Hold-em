@@ -123,10 +123,14 @@ $(document).ready(function() {
 		$(".stats-row").hide();
 		$(".leaders-row").show();
 		console.log(data);
+		if(data === "Bad Request") {
+			window.alert("400: Bad Request");
+			return;
+		}
         let json = JSON.parse(data);
         let leaders = json.leaders;
 
-        let th = "<tr><th>#</th><th>Name</th><th>Email</th><th>Email</th><th>Total Gross Profit</th>"
+        let th = "<tr><th>#</th><th>Name</th><th>Email</th><th>Total Gross Profit</th>"
         th += "<th>Highest Win</th><th>Total Games Played</th><th>League</th></tr>";
         $(".leaders-tbl").html(th);
         for(let i = 0; i < leaders.length; i++) {
@@ -138,6 +142,7 @@ $(document).ready(function() {
             let league = leaders[i].league;
 
             $(".leaders-tbl").append("<tr>");
+            $(".leaders-tbl").append("<td>" + (i + 1) + "</td>");
             $(".leaders-tbl").append("<td>" + name + "</td>");
             $(".leaders-tbl").append("<td>" + email + "</td>");
             $(".leaders-tbl").append("<td>" + totalCash + "</td>");
@@ -194,7 +199,7 @@ $(document).ready(function() {
 			$.ajax({
 				method: "POST",
 				url: "/stats",
-				data: {id: "GROSS", username: username, token: token},
+				data: {id: "GROSS", userstats: un, username: username, token: token},
 				success: function (data) {
 		            statsFunc(data);
 		        }
@@ -203,6 +208,21 @@ $(document).ready(function() {
 	});
 
 	var statsFunc = function(data) {
+		$("#stat").html("");
+		console.log(data);
+		if (data === "Bad Request")
+			window.alert("400: Bad Request");
+		else if (data === "User doesn't exist")
+			window.alert(data);
+		else {
+			let json = JSON.parse(data);
+			let name = json.name;
+			let stat = json.stat;
 
+			$("#stat").html("User " + name + ",  stats is " + stat);
+
+			$(".leaders-row").hide();
+			$(".stats-row").show();
+		}
 	};
 });
