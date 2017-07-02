@@ -48,11 +48,11 @@ public class SystemTests {
 	public void editUserPasswordTest() {
 		GCI.register("444", "12345678", "israel", "bla@bla.com","");
 		
-		assertEquals(GCI.getUser("444").getPassword(), "12345678"); //the user's password match
+		assertEquals(GCI.getUser("444").getEncryptedPassword(), "12345678"); //the user's password match
 		GCI.editUserPassword("444", "12345678", "12123434");
 
-		assertNotEquals(GCI.getUser("444").getPassword(), "12345678"); //now after changing the user's password, it don't match with "12345678"
-		assertEquals(GCI.getUser("444").getPassword(), "12123434"); //make sure that the password really changed
+		assertNotEquals(GCI.getUser("444").getEncryptedPassword(), "12345678"); //now after changing the user's password, it don't match with "12345678"
+		assertEquals(GCI.getUser("444").getEncryptedPassword(), "12123434"); //make sure that the password really changed
 		
 		assertFalse(GCI.editUserPassword("444", "12123434", "1212")); //Can't change to short password
 	}

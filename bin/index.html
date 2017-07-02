@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head lang="en">
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Texas Hold'em Poker</title>
+		<link rel="stylesheet" type="text/css" href="/styles.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	</head>
+	<body>
+		<div class="container-fluid main">
+			<div class="row login-form" style="display: none;">
+				<div class="col-md-4"></div>
+				<div class="col-md-4">
+					<form id="login-form">
+						<div class="form-group">
+							<label for="username1">Username</label>
+							<input type="text" class="form-control" id="username1" placeholder="Username" required>
+						</div>
+						<div class="form-group">
+							<label for="password1">Password</label>
+							<input type="password" class="form-control" id="password1" placeholder="Password" required>
+						</div>
+						<div class="form-group">
+							<label class="info-lbl"></label>
+						</div>
+						<button type="submit" class="btn btn-primary">Log In</button>
+						<button type="reset" class="btn btn-default btn-cancel">Cancel</button>
+					</form>
+				</div>
+				<div class="col-md-4"></div>
+			</div>
+			<div class="row signup-form" style="display: none;">
+				<div class="col-md-4"></div>
+				<div class="col-md-4">
+					<form id="signup-form">
+						<div class="form-group">
+							<label for="username">Username</label>
+							<input type="text" class="form-control" id="username" placeholder="Username" required>
+						</div>
+						<div class="form-group">
+							<label for="password">Password</label>
+							<input type="password" class="form-control" id="password" placeholder="Password" required>
+						</div>
+						<div class="form-group">
+							<label for="name">Name</label>
+							<input type="text" class="form-control" id="name" placeholder="Name" required>
+						</div>
+						<div class="form-group">
+							<label for="email">Email</label>
+							<input type="email" class="form-control" id="email" placeholder="Email" required>
+						</div>
+						<div class="form-group">
+							<label class="info-lbl"></label>
+						</div>
+						<button type="submit" class="btn btn-primary">Sign Up</button>
+						<button type="reset" class="btn btn-default btn-cancel">Cancel</button>
+					</form>
+				</div>
+				<div class="col-md-4"></div>
+			</div>
+			<div class="row sign-btns">
+				<div class="col-md-12">
+					<button type="button" class="btn btn-primary btn-login-form">Log In</button>
+					<button type="button" class="btn btn-primary btn-signup-form">Sign Up</button>
+				</div>
+			</div>
+		</div>
+		<div class="container-fluid home">
+			<div class="row" style="padding-top: 20px">
+				<div class="col-md-2">
+					<h3 id="welcome-lbl" style="color: black; margin: 0;"></h3>
+				</div>
+				<div class="col-md-2">
+					<div class="dropdown">
+						<button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+							Leaderboard
+							<span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+							<li><a href="#" id="gross-profit">Gross Profit</a></li>
+							<li><a href="#" id="highest-cash">Highest Cash Gain</a></li>
+							<li><a href="#" id="games-played">Games Played</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<input type="text" class="form-control" id="username-stat" placeholder="Enter a username">
+					<div class="btn-group" role="group" aria-label="...">
+						<button type="button" class="btn btn-default btn-winstat">Cash Win Rate</button>
+						<button type="button" class="btn btn-default btn-grossstat">Gross Profit Rate</button>
+					</div>
+				</div>
+				<div class="col-md-2"></div>
+				<div class="col-md-2">
+					<button type="button" class="btn btn-default btn-signout">Sign Out</button>
+				</div>
+			</div>
+			<div class="row leaders-row">
+				<div class="col-md-2"></div>
+				<div class="col-md-8">
+					<table class="table table-striped leaders-tbl">
+					</table>
+				</div>
+				<div class="col-md-2"></div>
+			</div>
+			<div class="row stats-row">
+
+			</div>
+		</div>
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		<script type="text/javascript" src="/scripts.js"></script>
+	</body>
+</html>

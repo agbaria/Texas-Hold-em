@@ -170,5 +170,19 @@ public String ReplayGame(String request);
  * @param gameID
  */
 public void updateGame(String gameID);
+
+/**
+ * TYPE = CASH/WIN/PLAY
+ * @param request is string that has this format: "LEADERBOARD *TYPE*"
+ * @return JSON: {[{name: _, email: _, avatar: _, totalCash: _, highestWin: _, gamesPlayed: _, league: _}, ....]}
+ */
+public String getLeadersboard(String request);
+
+/**
+ * TYPE = WIN/GROSS
+ * @param request is string that has this format: "STATS *TYPE* *USERNAME*"
+ * @return JSON {name: _, stat: _}
+ */
+public String getUserStats(String request);
 	
 }

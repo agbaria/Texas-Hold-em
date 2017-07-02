@@ -4,7 +4,10 @@
 	<classpathentry kind="src" path="serviceLayer"/>
 	<classpathentry kind="src" path="communicationLayer"/>
 	<classpathentry kind="src" path="acceptanceTests"/>
+	<classpathentry kind="src" path="webClient"/>
+	<classpathentry kind="src" path="dbLayer"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/hibernate"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

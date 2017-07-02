@@ -1,0 +1,28 @@
+.main {
+	background: url("/image?id=001");
+	background-position: center;
+	background-size: cover;
+	padding-top: 150px; 
+	height: 100vh;
+}
+
+.main-img {
+	max-width: 400px !important;
+}
+
+.sign-btns {
+	text-align: center;
+	margin-top: 125px;
+}
+
+.sign-btns button {
+	min-width: 76px;
+}
+
+label {
+	color: #FFF;
+}
+
+.info-lbl {
+	color: red;
+}

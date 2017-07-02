@@ -7,66 +7,66 @@ import communicationLayer.ConnectionHandler;
 public interface UserInterface {
 
 	public void getLog(LinkedList<String> i_game_logs);
-	
-	public void getLog(String  i_game_logs);
-	
-	public void editName(String newName) ;
-	
-	public void editEmail(String newEmail) ;
-	
-	public void editPassword(String newPassword) ;
-	
-	public String getID() ;
 
-	public void setID(String iD) ;
+	public void getLog(String i_game_logs);
 
-	public String getName() ;
+	public void editName(String newName);
 
-	public void setName(String name) ;
+	public void editEmail(String newEmail);
 
-	public String getEmail() ;
+	public void editPassword(String newPassword);
 
-	public void setEmail(String email) ;
+	public String getID();
 
-	public String getPassword() ;
+	public void setID(String iD);
 
-	public void setPassword(String password) ;
+	public String getName();
 
-	public int getTotalCash() ;
+	public void setName(String name);
 
-	public void setTotalCash(int totalCash) ;
+	public String getEmail();
 
-	public int getScore() ;
+	public void setEmail(String email);
 
-	public void setScore(int score) ;
+	public String getEncryptedPassword();
 
-	public UserStatus getStatus() ;
+	public void setEncryptedPassword(String encPass);
 
-	public void setStatus(UserStatus status) ;
+	public int getTotalCash();
 
-	public int getLeague() ;
+	public void setTotalCash(int totalCash);
 
-	public void setLeague(int league) ;
+	public int getScore();
 
+	public void setScore(int score);
 
-	public void GameUpdated(GameInterface game) ;
+	public UserStatus getStatus();
 
+	public void setStatus(UserStatus status);
+
+	public int getLeague();
+
+	public void setLeague(int league);
+
+	public void GameUpdated(GameInterface game);
 
 	public boolean takeAction(String GameID, int minBet);
 
-
-
-
 	public void giveHandler(ConnectionHandler handler);
-	
 
 	boolean changeMoney(int money);
+
 	public String getAvatar();
 
-	public void setAvatar(String avatar) ;
+	public void setAvatar(String avatar);
 
 	void actionMaked(String GameID);
 
 	public void SendMSG(String msg);
 
+	public void updateGamesPlayed();
+	
+	public void updateHighestWin(int win);
+	
+	public void updateAccumulatedWin(int win);
 }
